@@ -3,17 +3,18 @@ from game.action import Action, ACTION_TYPES
 HUMAN = 'HUMAN'
 AI_AGENT = 'AI_AGENT'
 
-PLAYER_TYPES = [AI_AGENT, HUMAN]
+PLAYER_TYPES = [HUMAN, AI_AGENT]
 
 class Player:
-    def __init__(self, agent_type):
-        if agent_type not in PLAYER_TYPES:
+    def __init__(self, player_type, player_id):
+        if player_type not in PLAYER_TYPES:
             raise Exception('Please select a valid agent type')
 
-        self.agent_type = agent_type
+        self.player_type = player_type
+        self.player_id = player_id
 
     def play(self, game_board):
-        if self.agent_type == HUMAN:
+        if self.player_type == HUMAN:
             print(f"Please select an action type: {ACTION_TYPES}")
             action_type = None
 
@@ -28,5 +29,8 @@ class Player:
             return Action(action_type, action_id)
 
         # TODO easy way to implement several types of agents and compare them, in case we want it in the future
-        elif self.agent_type == AI_AGENT:
+        elif self.player_type == AI_AGENT:
             pass
+
+    def to_str(self):
+        return f"Id:{self.player_id}\tType:{self.player_type}"

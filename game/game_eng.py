@@ -32,13 +32,13 @@ class GameEngine:
         except ValueError:
             n_players = 4
 
-        return n_players
+        return int(n_players)
 
     def initiate_players(self):
         self.state = INITIATE_PLAYERS
         # select player types (maybe give them names/ids so they're easier to identify?)
         players = []
-        for i in range(self.n_players):
+        for i in range(1, self.n_players + 1):
             print(f"Please insert the type for Player {i}")
             print(f"(default = {PLAYER_TYPES[0]})\n")
             for j, p_type in enumerate(PLAYER_TYPES):
@@ -50,9 +50,16 @@ class GameEngine:
             except:
                 pass
 
-            players.append(Player(player_type))
+            print(f"Please insert the name for Player {i}")
+            print(f"(default = Player {i})\n")
 
-            self.print_game_state()
+            # TODO check that id is not used before
+            player_id = input() or f"Player {i}"
+
+            new_player = Player(player_type, player_id)
+            players.append(new_player)
+
+            print(f"New player created:\t{new_player.to_str()}")
         return players
 
     def start_game(self):
@@ -60,19 +67,12 @@ class GameEngine:
 
         while not self.game_board.finished:
             curr_action = self.players[curr_player].play(self.game_board)
+
             self.game_board.play_action(curr_player, curr_action)
 
             curr_player = (curr_player + 1) % self.n_players
 
     def print_game_state(self):
+        print('\n'*100)
 
-        cls = lambda: os.system('cls')
-        cls()
-
-        if self.state > 0:
-            print(f"Number of players: {self.n_players}")
-
-        if self.state > 1:
-            for p in self.players:
-                # if defined print id/name + type
-                pass
+        pass
