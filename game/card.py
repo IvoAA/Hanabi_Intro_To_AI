@@ -32,10 +32,10 @@ class Card:
         self.number = number
         self.knowledge = CardKnowledge()
 
-    def get_hint(self, color, number):
-        if color:
-            matches = color == self.color
-            self.knowledge.update_colors(matches, color)
-        elif number:
-            matches = number == self.number
-            self.knowledge.update_numbers(matches, number)
+    def get_hint(self, hint):
+        if hint in COLORS:
+            matches = hint == self.color
+            self.knowledge.update_colors(matches, hint)
+        elif hint in NUMBERS:
+            matches = hint == self.number
+            self.knowledge.update_numbers(matches, hint)

@@ -20,6 +20,9 @@ class GameEngine:
 
         self.game_board = GameBoard(self.players)
 
+        for p in self.players:
+            p.link_game_board(self.game_board)
+
         self.start_game()
 
     def select_n_players(self):
@@ -66,7 +69,7 @@ class GameEngine:
         curr_player = 0
 
         while not self.game_board.finished:
-            curr_action = self.players[curr_player].play(self.game_board)
+            curr_action = self.players[curr_player].play()
 
             self.game_board.play_action(curr_player, curr_action)
 

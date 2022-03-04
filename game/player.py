@@ -1,4 +1,4 @@
-from game.action import Action, ACTION_TYPES
+from game.action import Action, PLAY, DISCARD, HINT
 
 HUMAN = 'HUMAN'
 AI_AGENT = 'AI_AGENT'
@@ -12,18 +12,38 @@ class Player:
 
         self.player_type = player_type
         self.player_id = player_id
+        self.game_board = None
 
-    def play(self, game_board):
+    def link_game_board(self, game_board):
+        self.game_board = game_board
+
+    def play(self):
         if self.player_type == HUMAN:
-            print(f"Please select an action type: {ACTION_TYPES}")
+            print(f"Please select an action type:")
+
+            action_types = {
+                'P': PLAY,
+                'D': DISCARD
+            }
+            if self.game_board.has_coins():
+                action_types['H'] = HINT
             action_type = None
 
-            while not action_type:
-                a_type = input()
-                action_type = ACTION_TYPES.get(a_type, None)
+            for k, v in action_types.items():
+                print(f"{k}: {v}")
 
-            possible_actions = Action.get_possible_actions(game_board, action_type)
-            print(f"Please select an action: {possible_actions}")
+            while not action_type:
+                a_type = input().upper()
+                if a_type in action_types:
+                    action_type = action_types[a_type]
+                    continue
+
+                print('Please choose a valid action type:')
+                for k, v in action_types.items():
+                    print(f"{k}: {v}")
+
+            possible_actions = Action.get_possible_actions(self.game_board, self.player_id, action_type)
+            print(f"Please select an action: {possible_actions}") # TODO proper display of actions
             action_id = input()
 
             return Action(action_type, action_id)
