@@ -26,7 +26,7 @@ class Action:
                 if other_id == player_id:
                     continue
 
-                action_set = game_board.get_player_colors(other_id).union(game_board.get_player_numbers(other_id))
+                action_set = game_board.get_player_colors(other_id).union(game_board.get_existing_numbers(other_id))
 
                 actions[other_id] = action_set
 

@@ -14,17 +14,17 @@ REPETITIONS = {
 
 class Deck:
     def __init__(self):
-        self.deck = []
+        self.cards = []
 
         for color in COLORS:
             for number in NUMBERS:
                 for _ in range(REPETITIONS.get(number)):
-                    self.deck.append(Card(color, number))
+                    self.cards.append(Card(color, number))
 
         self.__shuffle()
 
     def __shuffle(self):
-        random.shuffle(self.deck)
+        random.shuffle(self.cards)
 
     def get_card(self):
-        return self.deck.pop()
+        return self.cards.pop()
