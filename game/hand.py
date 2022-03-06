@@ -1,3 +1,5 @@
+
+
 class Hand:
     def __init__(self, cards):
         self.cards = {}
@@ -22,3 +24,11 @@ class Hand:
         for card in self.cards.values():
             numbers.add(card.number)
         return numbers
+
+    def __str__(self):
+        hand_builder = "[ "
+        for card in self.cards.values():
+            hand_builder += f"{card}, "
+        hand_builder = hand_builder[:-2]
+        hand_builder += " ]"
+        return hand_builder

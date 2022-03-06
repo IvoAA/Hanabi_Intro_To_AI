@@ -1,6 +1,7 @@
 import random
 
-from game.card import Card, COLORS, NUMBERS
+from game.card import Card, NUMBERS
+from constants.card_colors import CardColor
 
 # TODO: this should probably be somewhere else?
 REPETITIONS = {
@@ -16,7 +17,7 @@ class Deck:
     def __init__(self):
         self.cards = []
 
-        for color in COLORS:
+        for color in CardColor:
             for number in NUMBERS:
                 for _ in range(REPETITIONS.get(number)):
                     self.cards.append(Card(color, number))
@@ -28,3 +29,16 @@ class Deck:
 
     def get_card(self):
         return self.cards.pop()
+
+    def is_empty(self):
+        return len(self.cards) == 0
+
+    def __str__(self):
+        deck_builder = "[ "
+        for card in self.cards:
+            deck_builder += f"{str(card)}, "
+        deck_builder = deck_builder[:-2]
+        deck_builder += " ]"
+        return deck_builder
+
+

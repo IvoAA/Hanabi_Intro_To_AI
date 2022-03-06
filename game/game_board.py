@@ -1,17 +1,19 @@
 from game.deck import Deck
 from game.hand import Hand
-
+from game.card_board import CardBoard
 
 class GameBoard:
     def __init__(self, players):
         self.deck = Deck()
         self.player_hands = {}
-
+        self.players = players
         self.give_cards(players)
 
         self.coins = 8
         self.lives = 3
         self.finished = False
+
+        self.card_board = CardBoard()
 
     def play_action(self, player_id, action):
         pass
@@ -44,3 +46,27 @@ class GameBoard:
         if player_id not in self.player_hands:
             raise Exception(f"Player {player_id} not found")
         return self.player_hands.get(player_id).get_existing_numbers()
+
+    def is_finish(self):
+        if self.lives == 0:
+            self.finished = True
+            return
+
+        if self.deck.is_empty():
+            for hand in self.player_hands:
+                if len(hand.cards) > 0:
+                    self.finished = False
+                    return
+            self.finished = True
+
+    def view(self):
+        print("Game view")
+        print(f"Remaining cards in Deck (top are drawn first):")
+        print(self.deck)
+        print()
+        print("Hands")
+        for player in self.players:
+            print(f"\t{player.player_id} hand: {self.player_hands[player.player_id]}")
+
+        print()
+        print(self.card_board)
