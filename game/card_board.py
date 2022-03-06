@@ -15,7 +15,14 @@ class CardBoard:
         if self.goal[card.color] == card.number - 1:
             self.goal[card.color] += 1
             return True
+        self.discard.append(card)
         return False
+
+    def score(self):
+        score = 0
+        for point in self.goal.values():
+            score += point
+        return score
 
     def __str__(self):
         return f"Goal board - {Fore.RED}{self.goal[CardColor.RED]} " \

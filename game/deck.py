@@ -5,11 +5,11 @@ from constants.card_colors import CardColor
 
 # TODO: this should probably be somewhere else?
 REPETITIONS = {
-    "1": 3,
-    "2": 2,
-    "3": 2,
-    "4": 2,
-    "5": 1
+    1: 3,
+    2: 2,
+    3: 2,
+    4: 2,
+    5: 1
 }
 
 
@@ -28,6 +28,8 @@ class Deck:
         random.shuffle(self.cards)
 
     def get_card(self):
+        if len(self.cards) == 0:
+            return None
         return self.cards.pop()
 
     def is_empty(self):

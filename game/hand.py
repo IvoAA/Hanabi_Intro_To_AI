@@ -1,4 +1,6 @@
+import game.card
 
+from game.card import Card
 
 class Hand:
     def __init__(self, cards):
@@ -12,6 +14,9 @@ class Hand:
 
     def get_player_n_cards(self):
         return len(self.cards)
+
+    def get_card_by_idx(self, idx: int) -> Card:
+        return self.cards[idx]
 
     def get_existing_colors(self):
         colors = set()

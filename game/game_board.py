@@ -61,7 +61,7 @@ class GameBoard:
 
     def view(self):
         print("Game view")
-        print(f"Remaining cards in Deck (top are drawn first):")
+        print(f"Remaining cards in Deck (end is drawn first):")
         print(self.deck)
         print()
         print("Hands")
@@ -70,3 +70,4 @@ class GameBoard:
 
         print()
         print(self.card_board)
+        print(f"lives: {self.lives} \t\t coins: {self.coins} \t\t score: {self.card_board.score()}")
