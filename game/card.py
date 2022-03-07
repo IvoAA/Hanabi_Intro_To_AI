@@ -11,11 +11,28 @@ class CardKnowledge:
         self.possible_colors = list(CardColor)
         self.possible_numbers = list(NUMBERS)
 
-    def update_colors(self, color: CardColor):
-        self.possible_colors = [color]
+    def update_colors(self, color: CardColor, matching: bool):
+        if len(self.possible_colors) == 1:
+            return
 
-    def update_numbers(self, number):
-        self.possible_numbers = [number]
+        if matching:
+            self.possible_colors = [color]
+        else:
+            if color in self.possible_colors:
+                self.possible_colors.remove(color)
+
+    def update_numbers(self, number, matching: bool):
+        if len(self.possible_numbers) == 1:
+            return
+
+        if matching:
+            self.possible_numbers = [number]
+        else:
+            if number in self.possible_numbers:
+                self.possible_numbers.remove(number)
+
+    def __str__(self):
+        return f"{''.join(map(str, self.possible_numbers))}|{''.join(list(map(lambda x: x.value[0], self.possible_colors)))}"
 
 
 class Card:
@@ -26,9 +43,9 @@ class Card:
 
     def give_hint(self, hint: Union[CardColor, int]):
         if hint in CardColor:
-            self.knowledge.update_colors(hint)
+            self.knowledge.update_colors(hint, hint == self.color)
         elif hint in int:
-            self.knowledge.update_numbers(hint)
+            self.knowledge.update_numbers(hint, hint == self.number)
 
     def get_hint(self) -> list:
         cards = []

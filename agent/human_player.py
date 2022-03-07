@@ -13,15 +13,20 @@ class HumanPlayer(Player):
     def play(self):
         print(f"Player {self.player_id} turn. Make a play.")
         try:
-            command = self._print_Plays()
-            if command[0] == 'P':
-                self.play_card(int(command[1]) - 1)
-            if command[0] == 'H':
-                hinted_card = self.game_board.player_hands[command[1]].get_card_by_idx(int(command[2]) - 1)
-                hint = self._map_hint(command[3])
-                hinted_card.give_hint(hint)
-            if command[0] == 'D':
-                if not self.discard_card(self.hand.cards[int(command[1])]):
+            command_args = self._print_plays()
+            if command_args[0] == 'P':
+                number_of_card_to_play = command_args[1]
+                self.play_card(int(number_of_card_to_play) - 1)
+            if command_args[0] == 'H':
+                hint_for_player = command_args[1]
+                raw_hint = command_args[2]
+                hint = self._map_hint(raw_hint)
+
+                for card in self.game_board.player_hands[hint_for_player].cards.values():
+                    card.give_hint(hint)
+            if command_args[0] == 'D':
+                number_of_card_to_play = command_args[1]
+                if not self.discard_card(int(number_of_card_to_play) - 1):
                     print("Cant discard a card when you have max coins.")
                     self.play()
         except:
@@ -29,12 +34,12 @@ class HumanPlayer(Player):
             print('Error on input, try again')
             self.play()
 
-    def _print_Plays(self) -> list:
+    def _print_plays(self) -> list[str]:
         print()
         print("#################################################################")
         print("Type 'P' for playing a card followed by the card number (ex. P 3)")
-        print("Type 'H' for hinting a card, followed by player name card number "
-              "and Color (R, B, W, Y, G) or number (1-4) (ex. H Turing 3 B)")
+        print("Type 'H' for hinting a card, and Color (R, B, W, Y, G) or number "
+              "(1-4) (ex. H Turing 3 B)")
         print("Type 'D' for discarding a card and getting a coin (ex. D 3)")
         command = input("Enter option ... followed by enter").split()
         return command

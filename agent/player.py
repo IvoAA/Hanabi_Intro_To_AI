@@ -34,9 +34,9 @@ class Player(ABC):
             return True
         return False
 
-    def discard_card(self, card: Card) -> bool:
+    def discard_card(self, card_idx: int) -> bool:
         if self.game_board.coins >= 8:
             return False
-        self.game_board.card_board.discard_card(card)
+        self.game_board.card_board.discard_card(self.hand.cards[card_idx])
         return True
 

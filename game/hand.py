@@ -9,7 +9,7 @@ class Hand:
         if len(cards) < 4 or len(cards) > 5:
             raise Exception('Wrong number of cards given when creating Hand()')
 
-        for i, c in enumerate(cards):
+        for i, c in zip(range(1, len(cards) + 1), cards):
             self.cards[i] = c
 
     def get_player_n_cards(self):
@@ -31,9 +31,7 @@ class Hand:
         return numbers
 
     def __str__(self):
-        hand_builder = "[ "
-        for card in self.cards.values():
-            hand_builder += f"{card}, "
-        hand_builder = hand_builder[:-2]
-        hand_builder += " ]"
-        return hand_builder
+
+        card_str = ', '.join(map(str, self.cards.values()))
+        knowledge_str = ', '.join(map(lambda x: str(x.knowledge), self.cards.values()))
+        return f"[ {card_str} ] Knowledge: [ {knowledge_str} ]"
