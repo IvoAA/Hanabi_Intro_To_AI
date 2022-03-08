@@ -1,5 +1,7 @@
 import os
 
+from colorama import Fore
+
 from game.game_board import GameBoard
 from constants.player_type import PlayerType
 from agent.human_player import HumanPlayer
@@ -33,9 +35,9 @@ class GameEngine:
             p_type = PlayerType[os.environ[f"PLAYER_{i}"]]
             p_name = os.environ[f"PLAYER_{i}_NAME"]
             if p_type == PlayerType.HUMAN:
-                self.players.append(HumanPlayer(p_name, self.game_board))
+                self.players.append(HumanPlayer(p_name))
             elif p_type == PlayerType.ALPHA:
-                self.players.append(Alpha(p_name, self.game_board))
+                self.players.append(Alpha(p_name))
         self.state = INITIATE_PLAYERS
 
     def start_game(self):
@@ -45,6 +47,10 @@ class GameEngine:
             self.print_game_state()
             self.players[curr_player].play()
             curr_player = (curr_player + 1) % self.n_players
+            self.game_board.evaluate_game_finish()
+
+        print()
+        print(f"{Fore.MAGENTA}GAME OVER FELLA")
 
     def print_game_state(self):
         Screen.clear_screen()

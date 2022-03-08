@@ -7,8 +7,8 @@ from game.game_board import GameBoard
 
 
 class HumanPlayer(Player):
-    def __init__(self, player_id: str, game_board: GameBoard):
-        super().__init__(player_id, game_board)
+    def __init__(self, player_id: str):
+        super().__init__(player_id)
 
     def play(self):
         print(f"Player {self.player_id} turn. Make a play.")
@@ -16,25 +16,29 @@ class HumanPlayer(Player):
             command_args = self._print_plays()
             if command_args[0] == 'P':
                 number_of_card_to_play = command_args[1]
-                self.play_card(int(number_of_card_to_play) - 1)
+                self.play_card(int(number_of_card_to_play))
+                return
             if command_args[0] == 'H':
                 hint_for_player = command_args[1]
                 raw_hint = command_args[2]
                 hint = self._map_hint(raw_hint)
-
                 for card in self.game_board.player_hands[hint_for_player].cards.values():
                     card.give_hint(hint)
+                return
             if command_args[0] == 'D':
                 number_of_card_to_play = command_args[1]
-                if not self.discard_card(int(number_of_card_to_play) - 1):
+                if not self.discard_card(int(number_of_card_to_play)):
                     print("Cant discard a card when you have max coins.")
                     self.play()
+                return
+            print("Error on input, try again")
+            self.play()
         except:
             traceback.print_exc()
             print('Error on input, try again')
             self.play()
 
-    def _print_plays(self) -> list[str]:
+    def _print_plays(self) -> list:
         print()
         print("#################################################################")
         print("Type 'P' for playing a card followed by the card number (ex. P 3)")

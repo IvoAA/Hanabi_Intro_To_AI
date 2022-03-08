@@ -1,5 +1,5 @@
 from constants.card_colors import CardColor
-from colorama import Fore
+from colorama import Fore, Style
 from game.card import Card
 
 
@@ -25,8 +25,20 @@ class CardBoard:
         return score
 
     def __str__(self):
+        discard_pile = self._stringy_discard()
         return f"Goal board - {Fore.RED}{self.goal[CardColor.RED]} " \
                f"{Fore.BLUE}{self.goal[CardColor.BLUE]} " \
                f"{Fore.WHITE}{self.goal[CardColor.WHITE]} " \
                f"{Fore.YELLOW}{self.goal[CardColor.YELLOW]} " \
-               f"{Fore.GREEN}{self.goal[CardColor.GREEN]}"
+               f"{Fore.GREEN}{self.goal[CardColor.GREEN]} \n" \
+            f"{Style.RESET_ALL}Discard pile - {discard_pile}"
+
+    def _stringy_discard(self):
+        if len(self.discard) == 0:
+            return "[]"
+        deck_builder = "[ "
+        for card in self.discard:
+            deck_builder += f"{str(card)}, "
+        deck_builder = deck_builder[:-2]
+        deck_builder += " ]"
+        return deck_builder

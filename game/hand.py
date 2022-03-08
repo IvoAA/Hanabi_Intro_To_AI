@@ -31,7 +31,8 @@ class Hand:
         return numbers
 
     def __str__(self):
-
+        if self is None:
+            return ""
         card_str = ', '.join(map(str, self.cards.values()))
-        knowledge_str = ', '.join(map(lambda x: str(x.knowledge), self.cards.values()))
+        knowledge_str = ', '.join(map(lambda x: str(x.knowledge) if x else 'None', self.cards.values()))
         return f"[ {card_str} ] Knowledge: [ {knowledge_str} ]"
