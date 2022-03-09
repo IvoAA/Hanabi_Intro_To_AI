@@ -34,22 +34,17 @@ class CardKnowledge:
     def __str__(self):
         return f"{''.join(map(str, self.possible_numbers))}|{''.join(list(map(lambda x: x.value[0], self.possible_colors)))}"
 
-    def __encode__(self):
-        return f"[{str(self)}]"
+    def __to_dict__(self):
+        return {
+            "possible_colors": list(map(lambda x: x.value[0], self.possible_colors)),
+            "possible_numbers": self.possible_numbers
+        }
 
     @staticmethod
-    def decode(encoded_information: str):
-        encoded_information = encoded_information.replace("[", "")
-        encoded_information = encoded_information.replace("]", "")
-
-        numbers_str, colors_str = encoded_information.split("|")
-
-        numbers = list(map(int, numbers_str))
-        colors = list(map(lambda x: CardColor.from_value(x), colors_str))
-
+    def from_dict(dict_object: dict):
         card_knowledge = CardKnowledge()
-        card_knowledge.possible_colors = colors
-        card_knowledge.possible_numbers = numbers
+        card_knowledge.possible_colors = list(map(lambda x: CardColor.from_value(x), dict_object["possible_colors"]))
+        card_knowledge.possible_numbers = dict_object["possible_numbers"]
         return card_knowledge
 
 
@@ -84,20 +79,15 @@ class Card:
         if self.color == CardColor.GREEN:
             return f"{Fore.GREEN}{str(self.number)}{Style.RESET_ALL}"
 
-    def __encode__(self):
-        return f"[{str(self.color.value[0])}|{str(self.number)}|{self.knowledge.__encode__()}]"
+    def __to_dict__(self):
+        return {
+            "number": self.number,
+            "color": self.color.value[0],
+            "knowledge": self.knowledge.__to_dict__()
+        }
 
     @staticmethod
-    def decode(encoded_information: str):
-        if encoded_information[0] == "[":
-            encoded_information = encoded_information[1:]
-        if encoded_information[-1] == "]":
-            encoded_information = encoded_information[:-1]
-
-        color_str, number_str, knowledge_information_encoded = encoded_information.split("|", 2)
-
-        decoded_card = Card(CardColor.from_value(color_str), int(number_str))
-        decoded_knowledge = CardKnowledge.decode(knowledge_information_encoded)
-        decoded_card.knowledge = decoded_knowledge
-
-        return decoded_card
+    def from_dict(object_dict: dict):
+        new_card = Card(CardColor.from_value(object_dict["color"]), int(object_dict["number"]))
+        new_card.knowledge = CardKnowledge.from_dict(object_dict["knowledge"])
+        return new_card

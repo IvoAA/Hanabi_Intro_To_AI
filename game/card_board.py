@@ -30,3 +30,20 @@ class CardBoard:
                f"{Fore.WHITE}{self.goal[CardColor.WHITE]} " \
                f"{Fore.YELLOW}{self.goal[CardColor.YELLOW]} " \
                f"{Fore.GREEN}{self.goal[CardColor.GREEN]}"
+
+    def __to_dict__(self):
+        return_dict = {
+            "discard": list(map(lambda x: x.__to_dict__(), self.discard))
+        }
+
+        for key, value in self.goal.items():
+            return_dict[key.value[0]] = value
+
+        return return_dict
+
+    @staticmethod
+    def from_dict(object_dict: dict):
+        new_card_board = CardBoard()
+        new_card_board.goal = dict(list(map(lambda x: (x, object_dict[x.value[0]]), new_card_board.goal.keys())))
+        new_card_board.discard = list(map(lambda x: Card.from_dict(x), object_dict["discard"]))
+        return new_card_board

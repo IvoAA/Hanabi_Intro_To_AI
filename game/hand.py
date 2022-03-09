@@ -35,3 +35,14 @@ class Hand:
         card_str = ', '.join(map(str, self.cards.values()))
         knowledge_str = ', '.join(map(lambda x: str(x.knowledge), self.cards.values()))
         return f"[ {card_str} ] Knowledge: [ {knowledge_str} ]"
+
+    def __to_list__(self):
+        return list(map(lambda x: x.__to_dict__(), self.cards.values()))
+
+    @staticmethod
+    def from_list(object_list: list):
+        cards = []
+        for card_object in object_list:
+            cards.append(Card.from_dict(card_object))
+
+        return Hand(cards)
