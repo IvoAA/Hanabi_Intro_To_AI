@@ -5,8 +5,8 @@ from game.game_board import GameBoard
 
 
 class Alpha(Player):
-    def __init__(self, player_id: str, game_board: GameBoard):
-        super().__init__(player_id, game_board)
+    def __init__(self, player_id: str):
+        super().__init__(player_id)
 
     def play(self):
         print(f"Turn of {self.player_id}")

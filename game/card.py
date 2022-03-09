@@ -55,9 +55,9 @@ class Card:
         self.knowledge = CardKnowledge()
 
     def give_hint(self, hint: Union[CardColor, int]):
-        if isinstance(hint, CardColor):
+        if type(hint) is CardColor:
             self.knowledge.update_colors(hint, hint == self.color)
-        elif isinstance(hint, int):
+        elif type(hint) is int:
             self.knowledge.update_numbers(hint, hint == self.number)
 
     def get_hint(self) -> list:

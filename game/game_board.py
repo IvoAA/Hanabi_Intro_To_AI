@@ -12,7 +12,7 @@ class GameBoard:
         self.coins = 8
         self.lives = 3
         self.finished = False
-
+        self.turns_before_end = len(self.players) + 1
         self.card_board = CardBoard()
 
     def play_action(self, player_id, action):
@@ -47,17 +47,20 @@ class GameBoard:
             raise Exception(f"Player {player_id} not found")
         return self.player_hands.get(player_id).get_existing_numbers()
 
-    def is_finish(self):
+    def evaluate_game_finish(self):
         if self.lives == 0:
             self.finished = True
             return
 
-        if self.deck.is_empty():
-            for hand in self.player_hands:
-                if len(hand.cards) > 0:
-                    self.finished = False
-                    return
+        if self.card_board.score() == 25:
+            print(f"Game finished congratulation!")
             self.finished = True
+            return
+
+        if self.deck.is_empty():
+            if self.turns_before_end == 0:
+                self.finished = True
+            self.turns_before_end -= 1
 
     def view(self):
         print("Game view")

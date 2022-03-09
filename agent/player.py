@@ -1,15 +1,16 @@
+import traceback
 from abc import ABC, abstractmethod
 from game.game_board import GameBoard
-from game.card import Card
 from typing import Union
 from constants.card_colors import CardColor
-
+from agent.state_view import StateView
 
 class Player(ABC):
-    def __init__(self, player_id: str, game_board: GameBoard):
+    def __init__(self, player_id: str):
         self.player_id = player_id
         self.game_board = None
         self.hand = None
+        self.game_view = None
 
     @abstractmethod
     def play(self):
@@ -18,6 +19,7 @@ class Player(ABC):
     def game_injection(self, game_board: GameBoard):
         self.game_board = game_board
         self.hand = self.game_board.player_hands[self.player_id]
+        self.game_view = StateView(game_board, self.player_id)
 
     def play_card(self, card_idx: int) -> bool:
         result = self.game_board.card_board.play_card(self.hand.cards[card_idx])
@@ -27,12 +29,19 @@ class Player(ABC):
         return result
 
     # Returns false in case that there is no more coins.
-    def give_hint(self, card: Card, hint: Union[CardColor, int]) -> bool:
-        if self.game_board.coins > 0:
-            card.give_hint(hint)
-            self.game_board -= 1
-            return True
-        return False
+    def give_hint(self, player_id: str, hint: Union[CardColor, int]) -> bool:
+        try:
+            if self.game_board.coins > 0:
+                target_hand = self.game_board.player_hands[player_id]
+                for card in target_hand.keys():
+                    card.give_hint(hint)
+                self.game_board -= 1
+                return True
+            else:
+                return False
+        except:
+            traceback.print_exc()
+            return False
 
     def discard_card(self, card_idx: int) -> bool:
         if self.game_board.coins >= 8:
