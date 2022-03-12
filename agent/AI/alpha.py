@@ -11,6 +11,7 @@ class Alpha(Player):
     def play(self):
         print(f"Turn of {self.player_id}")
         input("Press enter to execute random task")
-        card_idx = random.randint(1, 4)
+        # idx starts always with zero
+        card_idx = random.randint(0, 3)
         self.play_card(card_idx)
 

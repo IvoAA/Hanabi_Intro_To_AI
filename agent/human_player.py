@@ -16,18 +16,18 @@ class HumanPlayer(Player):
             command_args = self._print_plays()
             if command_args[0] == 'P':
                 number_of_card_to_play = command_args[1]
-                self.play_card(int(number_of_card_to_play))
+                self.play_card(int(number_of_card_to_play) - 1)
                 return
             if command_args[0] == 'H':
                 hint_for_player = command_args[1]
                 raw_hint = command_args[2]
                 hint = self._map_hint(raw_hint)
-                for card in self.game_board.player_hands[hint_for_player].cards.values():
+                for card in self.game_board.player_hands[hint_for_player].cards:
                     card.give_hint(hint)
                 return
             if command_args[0] == 'D':
                 number_of_card_to_play = command_args[1]
-                if not self.discard_card(int(number_of_card_to_play)):
+                if not self.discard_card(int(number_of_card_to_play) - 1):
                     print("Cant discard a card when you have max coins.")
                     self.play()
                 return

@@ -17,7 +17,7 @@ class Action:
 
 
     @staticmethod
-    def get_playing_card_actions(state_view: StateView):#
+    def get_playing_card_actions(state_view: StateView):
         pass
 
     @staticmethod
