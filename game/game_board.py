@@ -74,3 +74,30 @@ class GameBoard:
         print()
         print(self.card_board)
         print(f"lives: {self.lives} \t\t coins: {self.coins} \t\t score: {self.card_board.score()}")
+
+    def __to_dict__(self):
+        return {
+            "deck": self.deck.__to_list__(),
+            "player_hands": dict(list(map(lambda x: (x, self.player_hands[x].__to_list__()), self.player_hands.keys()))),
+            "coins": self.coins,
+            "lives": self.lives,
+            "card_board": self.card_board.__to_dict__()
+        }
+
+    @staticmethod
+    def from_dict(object_dict: dict, player_classes: list):
+        assert(len(player_classes) == len(object_dict["player_hands"].keys()))
+        new_players = []
+        for cls, player_name in zip(player_classes, object_dict["player_hands"].keys()):
+            new_players.append(cls(player_name, None))
+
+        new_game_board = GameBoard(new_players)
+
+        new_game_board.deck = Deck.from_list(object_dict["deck"])
+        new_game_board.coins = object_dict["coins"]
+        new_game_board.lives = object_dict["lives"]
+        new_game_board.card_board = CardBoard.from_dict(object_dict["card_board"])
+        new_game_board.player_hands = dict(list(map(lambda x: (x, Hand.from_list(object_dict["player_hands"][x])),
+                                                    object_dict["player_hands"].keys())))
+
+        return new_game_board

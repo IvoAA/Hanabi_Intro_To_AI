@@ -25,20 +25,27 @@ class CardBoard:
         return score
 
     def __str__(self):
-        discard_pile = self._stringy_discard()
+        discard_pile = f"[ {', '.join(map(str, self.discard))} ]"
         return f"Goal board - {Fore.RED}{self.goal[CardColor.RED]} " \
                f"{Fore.BLUE}{self.goal[CardColor.BLUE]} " \
                f"{Fore.WHITE}{self.goal[CardColor.WHITE]} " \
                f"{Fore.YELLOW}{self.goal[CardColor.YELLOW]} " \
                f"{Fore.GREEN}{self.goal[CardColor.GREEN]} \n" \
-            f"{Style.RESET_ALL}Discard pile - {discard_pile}"
+               f"{Style.RESET_ALL}Discard pile - {discard_pile}"
 
-    def _stringy_discard(self):
-        if len(self.discard) == 0:
-            return "[]"
-        deck_builder = "[ "
-        for card in self.discard:
-            deck_builder += f"{str(card)}, "
-        deck_builder = deck_builder[:-2]
-        deck_builder += " ]"
-        return deck_builder
+    def __to_dict__(self):
+        return_dict = {
+            "discard": list(map(lambda x: x.__to_dict__(), self.discard))
+        }
+
+        for key, value in self.goal.items():
+            return_dict[key.value[0]] = value
+
+        return return_dict
+
+    @staticmethod
+    def from_dict(object_dict: dict):
+        new_card_board = CardBoard()
+        new_card_board.goal = dict(list(map(lambda x: (x, object_dict[x.value[0]]), new_card_board.goal.keys())))
+        new_card_board.discard = list(map(lambda x: Card.from_dict(x), object_dict["discard"]))
+        return new_card_board

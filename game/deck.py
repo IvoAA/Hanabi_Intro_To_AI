@@ -36,11 +36,15 @@ class Deck:
         return len(self.cards) == 0
 
     def __str__(self):
-        deck_builder = "[ "
-        for card in self.cards:
-            deck_builder += f"{str(card)}, "
-        deck_builder = deck_builder[:-2]
-        deck_builder += " ]"
-        return deck_builder
+        return f"[ {', '.join(map(str, self.cards))} ]"
+
+    def __to_list__(self):
+        return list(map(lambda x: x.__to_dict__(), self.cards))
+
+    @staticmethod
+    def from_list(object_list: list):
+        new_deck = Deck()
+        new_deck.cards = list(map(lambda x: Card.from_dict(x), object_list))
+        return new_deck
 
 

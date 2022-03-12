@@ -34,6 +34,19 @@ class CardKnowledge:
     def __str__(self):
         return f"{''.join(map(str, self.possible_numbers))}|{''.join(list(map(lambda x: x.value[0], self.possible_colors)))}"
 
+    def __to_dict__(self):
+        return {
+            "possible_colors": list(map(lambda x: x.value[0], self.possible_colors)),
+            "possible_numbers": self.possible_numbers
+        }
+
+    @staticmethod
+    def from_dict(dict_object: dict):
+        card_knowledge = CardKnowledge()
+        card_knowledge.possible_colors = list(map(lambda x: CardColor.from_value(x), dict_object["possible_colors"]))
+        card_knowledge.possible_numbers = dict_object["possible_numbers"]
+        return card_knowledge
+
 
 class Card:
     def __init__(self, color: CardColor, number: int):
@@ -65,3 +78,16 @@ class Card:
             return f"{Fore.YELLOW}{str(self.number)}{Style.RESET_ALL}"
         if self.color == CardColor.GREEN:
             return f"{Fore.GREEN}{str(self.number)}{Style.RESET_ALL}"
+
+    def __to_dict__(self):
+        return {
+            "number": self.number,
+            "color": self.color.value[0],
+            "knowledge": self.knowledge.__to_dict__()
+        }
+
+    @staticmethod
+    def from_dict(object_dict: dict):
+        new_card = Card(CardColor.from_value(object_dict["color"]), int(object_dict["number"]))
+        new_card.knowledge = CardKnowledge.from_dict(object_dict["knowledge"])
+        return new_card
