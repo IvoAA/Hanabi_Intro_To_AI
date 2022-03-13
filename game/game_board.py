@@ -1,6 +1,7 @@
 from game.deck import Deck
 from game.hand import Hand
 from game.card_board import CardBoard
+from game.action import Action, ActionType
 
 class GameBoard:
     def __init__(self, players):
@@ -15,8 +16,33 @@ class GameBoard:
         self.turns_before_end = len(self.players) + 1
         self.card_board = CardBoard()
 
-    def play_action(self, player_id, action):
-        pass
+    def perform_action(self, player_id, action: Action):
+        print(f"Player: {player_id} action: {action}")
+        if action.action_type == ActionType.PLAY:
+            self.play_card(player_id, action.action_value)
+        elif action.action_type == ActionType.DISCARD:
+            self.discard_card(player_id, action.action_value)
+        elif action.action_type == ActionType.HINT:
+            self.hint(player_id, action)
+
+    def play_card(self, player_id, card_idx) -> bool:
+        result = self.card_board.play_card(self.player_hands[player_id].cards[card_idx])
+        if not result:
+            self.lives -= 1
+        self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
+        return result
+
+    def discard_card(self, player_id, card_idx):
+        if self.coins >= 8:
+            return False
+        self.card_board.discard_card(self.player_hands[player_id].cards[card_idx])
+        self.coins += 1
+        return True
+
+    def hint(self, player_id, action: Action):
+        for card in self.player_hands[action.effected_player_id].cards:
+            card.give_hint(action.action_value)
+        self.coins -= 1
 
     def give_cards(self, players):
         cards_per_player = 4 if len(players) > 3 else 5
