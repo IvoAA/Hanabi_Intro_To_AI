@@ -5,12 +5,13 @@ import numpy as np
 
 class StateView:
     def __init__(self, game_board, player_id: str):
-        self.hands = copy.deepcopy(game_board.player_hands)
-        self.goal = copy.deepcopy(game_board.card_board.goal)
-        self.discarded = copy.deepcopy(game_board.card_board.discard)
-        self.lives = game_board.lives
-        self.coins = game_board.coins
-        self.player_ids = list(game_board.player_hands)
+        self.game_board = copy.deepcopy(game_board)
+        self.player_hands = self.game_board.player_hands
+        self.goal = self.game_board.card_board.goal
+        self.discarded = self.game_board.card_board.discard
+        self.lives = self.game_board.lives
+        self.coins = self.game_board.coins
+        self.player_ids = list(self.game_board.player_hands)
         self.idx_rotation = np.roll(self.player_ids, -1 * self.player_ids.index(player_id))
 
     def clone(self):
@@ -26,4 +27,4 @@ class StateView:
         return self.idx_rotation[turn_number % len(self.player_ids)]
 
     def get_player_hand(self, turn_number: int):
-        return self.hands[self.get_player_id_for_turn(turn_number)]
+        return self.player_hands[self.get_player_id_for_turn(turn_number)]

@@ -1,7 +1,11 @@
+import copy
+
 from game.deck import Deck
 from game.hand import Hand
+from game.card import Card, CardColor
 from game.card_board import CardBoard
 from game.action import Action, ActionType
+from itertools import product
 
 class GameBoard:
     def __init__(self, players):
@@ -24,6 +28,40 @@ class GameBoard:
             self.discard_card(player_id, action.action_value)
         elif action.action_type == ActionType.HINT:
             self.hint(player_id, action)
+
+    def perform_simulated_action(self, player_id, action: Action):
+        print(f"Player: {player_id} action: {action}")
+        if action.action_type == ActionType.PLAY:
+            return self.play_card_with_possibilities(player_id, action.action_value)
+        elif action.action_type == ActionType.DISCARD:
+            self.discard_card(player_id, action.action_value)
+        elif action.action_type == ActionType.HINT:
+            self.hint(player_id, action)
+        return [{"probability": 1, "board": copy.deepcopy(self)}]
+
+    def play_card_with_possibilities(self, player_id, card_idx: int):
+        player_card: Card = self.player_hands[player_id].cards[card_idx]
+        possible_colors = player_card.knowledge.possible_colors
+        possible_numbers = player_card.knowledge.possible_numbers
+        all_possibilities = list(product(possible_colors, possible_numbers))
+        if len(all_possibilities) == 1:
+            return [{"probability": 1, "board": copy.deepcopy(self).play_card(player_id, card_idx)}]
+
+        copied_boards = [copy.deepcopy(self) for _ in range(len(all_possibilities))]
+        possible_boards = []
+        for possibility, board in zip(all_possibilities, copied_boards):
+            board.play_fake_card(player_id,
+                                     card_idx,
+                                     possibility[0],
+                                     possibility[1])
+            possible_boards.append({"probability": 1 / len(all_possibilities), "board": board})
+        return possible_boards
+
+    def play_fake_card(self, player_id, card_idx: int, card_color: CardColor, card_number: int):
+        result = self.card_board.play_card(Card(card_color, card_number))
+        if not result:
+            self.lives -= 1
+        self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
 
     def play_card(self, player_id, card_idx) -> bool:
         result = self.card_board.play_card(self.player_hands[player_id].cards[card_idx])

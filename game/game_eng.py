@@ -6,6 +6,7 @@ from game.game_board import GameBoard
 from constants.player_type import PlayerType
 from agent.human_player import HumanPlayer
 from agent.AI.alpha import Alpha
+from agent.AI.beta import Beta
 import utils.screen as Screen
 
 INIT = 0
@@ -38,6 +39,8 @@ class GameEngine:
                 self.players.append(HumanPlayer(p_name))
             elif p_type == PlayerType.ALPHA:
                 self.players.append(Alpha(p_name))
+            elif p_type == PlayerType.BETA:
+                self.players.append(Beta(p_name))
         self.state = INITIATE_PLAYERS
 
     def start_game(self):
