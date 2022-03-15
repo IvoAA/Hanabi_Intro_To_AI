@@ -32,7 +32,7 @@ class CardKnowledge:
                 self.possible_numbers.remove(number)
 
     def __str__(self):
-        return f"{''.join(map(str, self.possible_numbers))}|{''.join(list(map(lambda x: x.value[0], self.possible_colors)))}"
+        return f"{''.join(map(str, self.possible_numbers)):<5}|{''.join(list(map(lambda x: x.value[0], self.possible_colors))):<5}"
 
     def __to_dict__(self):
         return {

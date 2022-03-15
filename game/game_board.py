@@ -134,8 +134,9 @@ class GameBoard:
         print(self.deck)
         print()
         print("Hands")
+        max_player_id_length = max(list(map(len, self.player_ids)))
         for player_id in self.player_ids:
-            print(f"\t{player_id} hand: {self.player_hands[player_id]}")
+            print(f"\t{player_id:<{max_player_id_length}} hand: {self.player_hands[player_id]}")
 
         print()
         print(self.card_board)
