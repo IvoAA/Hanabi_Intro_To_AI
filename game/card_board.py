@@ -12,11 +12,14 @@ class CardBoard:
         self.discard.append(card)
 
     def play_card(self, card: Card) -> bool:
-        if self.goal[card.color] == card.number - 1:
+        if self.card_fits(card):
             self.goal[card.color] += 1
             return True
         self.discard.append(card)
         return False
+
+    def card_fits(self, card: Card) -> bool:
+        return self.goal[card.color] == card.number - 1
 
     def score(self):
         score = 0

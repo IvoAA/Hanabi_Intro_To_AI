@@ -1,20 +1,30 @@
-from game.game_board import GameBoard
+#from game.game_board import GameBoard
 import copy
+import numpy as np
 
 
 class StateView:
-    def __init__(self, game_board: GameBoard, player_id: str):
-        self.hand = game_board.player_hands[player_id]
-        self.goal = game_board.card_board.goal
-        self.discarded = game_board.card_board.discard
-        self.nr_players = len(game_board.player_hands)
-        self.lives = game_board.lives
-        self.coins = game_board.coins
-        players = list(game_board.player_hands)
-        self_pos = players.index(player_id)
-        self.next_hand_1 = game_board.player_hands[players[(self_pos + 1) % self.nr_players]]
-        self.next_hand_2 = game_board.player_hands[players[(self_pos + 2) % self.nr_players]]
-        self.next_hand_3 = game_board.player_hands[players[(self_pos + 3) % self.nr_players]]
+    def __init__(self, game_board, player_id: str):
+        self.game_board = copy.deepcopy(game_board)
+        self.player_hands = self.game_board.player_hands
+        self.goal = self.game_board.card_board.goal
+        self.discarded = self.game_board.card_board.discard
+        self.lives = self.game_board.lives
+        self.coins = self.game_board.coins
+        self.player_ids = list(self.game_board.player_hands)
+        self.idx_rotation = np.roll(self.player_ids, -1 * self.player_ids.index(player_id))
 
     def clone(self):
         return copy.deepcopy(self)
+
+    def get_current_player_id(self) -> str:
+        return self.idx_rotation[0]
+
+    def get_current_player_hand(self):
+        return self.get_player_hand(0)
+
+    def get_player_id_for_turn(self, turn_number: int) -> str:
+        return self.idx_rotation[turn_number % len(self.player_ids)]
+
+    def get_player_hand(self, turn_number: int):
+        return self.player_hands[self.get_player_id_for_turn(turn_number)]
