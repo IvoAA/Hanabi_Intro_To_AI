@@ -1,10 +1,12 @@
 import random
-
+import logging
 from game.game_board import GameBoard
 from agent.player import Player
 from agent.state_view import StateView
 from game.action import Action
 import copy
+
+log = logging.getLogger(__name__)
 
 
 class Beta(Player):
@@ -12,7 +14,7 @@ class Beta(Player):
         super().__init__(player_id)
 
     def play(self):
-        print(f"Turn of {self.player_id}")
+        log.debug(f"Turn of {self.player_id}")
         self.game_view = StateView(self.game_board, self.player_id)
         # idx starts always with zero
         self.game_view: StateView
