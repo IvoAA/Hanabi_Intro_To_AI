@@ -29,5 +29,8 @@ class Beta(Player):
     def evaluate_board(self, action: Action, game_board: GameBoard) -> int:
         lives_before = game_board.lives
         new_game_boards = game_board.perform_simulated_action(self.player_id, action)
-        probability_lives_after = sum(list(map(lambda r: r.get("probability") * r.get("board").lives, new_game_boards)))
+        try:
+            probability_lives_after = sum(list(map(lambda r: r.get("probability") * r.get("board").lives, new_game_boards)))
+        except:
+            probability_lives_after = 0
         return probability_lives_after - lives_before
