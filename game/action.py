@@ -38,11 +38,14 @@ class Action:
         return Action.get_player_card_actions(state_view, ActionType.DISCARD)
 
     @staticmethod
-    def get_hint_actions(state_view: StateView):
+    def get_hint_actions(state_view: StateView, ignore_player_id: str):
         actions = []
         if state_view.coins <= 0:
             return actions
-        for turn in range(1, len(state_view.player_ids)):
+
+        for turn, player_id in zip(range(1, len(state_view.player_ids)), state_view.player_ids):
+            if player_id == ignore_player_id:
+                continue
             player_hand: Hand = state_view.get_player_hand(turn)
             existing_options = player_hand.get_existing_numbers().union(player_hand.get_existing_colors())
 
@@ -51,7 +54,7 @@ class Action:
         return actions
 
     @staticmethod
-    def get_possible_actions(state_view: StateView):
+    def get_possible_actions(state_view: StateView, ignore_player_id: str = ""):
         return Action.get_playing_card_actions(state_view) + \
                Action.get_discard_card_actions(state_view) + \
-               Action.get_hint_actions(state_view)
+               Action.get_hint_actions(state_view, ignore_player_id)

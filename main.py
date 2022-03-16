@@ -3,7 +3,16 @@ import time
 from game.game_eng import GameEngine
 from dotenv import load_dotenv
 import colorama
+import logging, sys
 
+log = logging.getLogger(__name__)
+
+# noinspection PyArgumentList
+logging.basicConfig(format="{filename}:{lineno} {asctime} {levelname[0]} - {message}",
+                    datefmt="%H:%M:%S",
+                    level=logging.DEBUG,
+                    stream=sys.stdout,
+                    style='{')
 
 def run_game(q=None):
     start_time = time.time()

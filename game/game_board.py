@@ -34,7 +34,7 @@ class GameBoard:
 
 
     def perform_simulated_action(self, player_id, action: Action):
-        print(f"Player: {player_id} action: {action}")
+        #log.debug(f"[SIMULATE] Player: {player_id} action: {action}")
         if action.action_type == ActionType.PLAY:
             return self.play_card_with_possibilities(player_id, action.action_value)
         elif action.action_type == ActionType.DISCARD:

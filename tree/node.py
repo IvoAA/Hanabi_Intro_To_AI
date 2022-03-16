@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import sys
 from abc import ABC, abstractmethod
 import numpy as np
 from typing import List
@@ -12,17 +12,28 @@ class Node(ABC):
         self.predecessor = predecessor_node
         self.action = action
         self.in_grouped_node = in_grouped_node
+        self.explored = False
+        self.propagated_value = 0
 
     @abstractmethod
     def expected_value(self):
         pass
 
     @abstractmethod
-    def ger_predecessor(self) -> Node:
+    def get_predecessor(self) -> Node:
         pass
 
+    def was_explored(self):
+        self.explored = True
+
+    def update_propagated_value(self, new_value: float):
+        self.propagated_value = max(self.propagated_value, new_value)
+
+    def get_propagated_value(self):
+        return self.propagated_value if self.propagated_value != 0 else self.expected_value()
+
     def __str__(self):
-        return f"Depth: {self.depth}"
+        return f"Depth: {self.depth} Prop: {self.get_propagated_value()} Action: {self.action}"
 
 
 class SingleNode(Node):
@@ -37,7 +48,7 @@ class SingleNode(Node):
     def expected_value(self):
         return self.value
 
-    def ger_predecessor(self) -> Node:
+    def get_predecessor(self) -> Node:
         if isinstance(self.predecessor, GroupedNode):
             return self.predecessor.predecessor
         else:
@@ -59,10 +70,15 @@ class GroupedNode(Node):
         assert all(list(map(lambda x: x.depth == depth, self.nodes)))
 
     def expected_value(self):
+        # Numpy vector product
         return np.array(list(map(lambda x: x.value, self.nodes))) @ np.array(list(map(lambda x: x.probability, self.nodes)))
 
-    def ger_predecessor(self) -> Node:
+    def get_predecessor(self) -> Node:
         return self.predecessor
+
+    def get_propagated_value(self):
+        # Numpy vector product
+        return np.array(list(map(lambda x: x.propagated_value, self.nodes))) @ np.array(list(map(lambda x: x.probability, self.nodes)))
 
     def __str__(self):
         return f"{super().__str__()} #_nodes: {len(self.nodes)} expected_value: {self.expected_value()} "
