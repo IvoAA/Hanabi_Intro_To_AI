@@ -1,3 +1,5 @@
+import time
+
 from game.game_eng import GameEngine
 from dotenv import load_dotenv
 import colorama
@@ -14,14 +16,19 @@ logging.basicConfig(format="{filename}:{lineno} {asctime} {levelname[0]} - {mess
                     stream=sys.stdout,
                     style='{')
 
-
-def main():
-    random.seed(1337)
+def run_game(q=None):
+    start_time = time.time()
     colorama.init(autoreset=True)
     load_dotenv()
     engine = GameEngine()
     engine.start_game()
+    score = engine.game_board.card_board.score()
+    print("--- %s seconds ---" % (time.time() - start_time))
+    print(f"Game over score - {score}, actions {engine.game_board.nr_actions}")
+    if q:
+        q.put((score, engine.game_board.nr_actions))
+    return score, engine.game_board.nr_actions
 
 
 if __name__ == '__main__':
-    main()
+    run_game()

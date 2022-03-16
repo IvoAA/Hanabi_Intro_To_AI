@@ -20,15 +20,18 @@ class GameBoard:
         self.finished = False
         self.turns_before_end = len(self.player_ids) + 1
         self.card_board = CardBoard()
+        self.nr_actions = 0
 
     def perform_action(self, player_id, action: Action):
         log.info(f"[PERFORM] Player: {player_id} action: {action}")
+        self.nr_actions += 1
         if action.action_type == ActionType.PLAY:
             self.play_card(player_id, action.action_value)
         elif action.action_type == ActionType.DISCARD:
             self.discard_card(player_id, action.action_value)
         elif action.action_type == ActionType.HINT:
             self.hint(player_id, action)
+
 
     def perform_simulated_action(self, player_id, action: Action):
         log.debug(f"[SIMULATE] Player: {player_id} action: {action}")
@@ -46,15 +49,17 @@ class GameBoard:
         possible_numbers = player_card.knowledge.possible_numbers
         all_possibilities = list(product(possible_colors, possible_numbers))
         if len(all_possibilities) == 1:
-            return [{"probability": 1, "board": copy.deepcopy(self).play_card(player_id, card_idx)}]
+            new_board = copy.deepcopy(self)
+            new_board.play_card(player_id, card_idx)
+            return [{"probability": 1, "board": new_board}]
 
         copied_boards = [copy.deepcopy(self) for _ in range(len(all_possibilities))]
         possible_boards = []
         for possibility, board in zip(all_possibilities, copied_boards):
             board.play_fake_card(player_id,
-                                     card_idx,
-                                     possibility[0],
-                                     possibility[1])
+                                 card_idx,
+                                 possibility[0],
+                                 possibility[1])
             possible_boards.append({"probability": 1 / len(all_possibilities), "board": board})
         return possible_boards
 
@@ -77,7 +82,7 @@ class GameBoard:
             return False
         self.card_board.discard_card(self.player_hands[player_id].cards[card_idx])
         if not self.deck.is_empty():
-            self.player_hands[player_id].cards[card_idx]= self.deck.get_card()
+            self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
         self.coins += 1
         return True
 
@@ -146,7 +151,8 @@ class GameBoard:
     def __to_dict__(self):
         return {
             "deck": self.deck.__to_list__(),
-            "player_hands": dict(list(map(lambda x: (x, self.player_hands[x].__to_list__()), self.player_hands.keys()))),
+            "player_hands": dict(
+                list(map(lambda x: (x, self.player_hands[x].__to_list__()), self.player_hands.keys()))),
             "coins": self.coins,
             "lives": self.lives,
             "card_board": self.card_board.__to_dict__()
@@ -154,7 +160,7 @@ class GameBoard:
 
     @staticmethod
     def from_dict(object_dict: dict, player_classes: list):
-        assert(len(player_classes) == len(object_dict["player_hands"].keys()))
+        assert (len(player_classes) == len(object_dict["player_hands"].keys()))
         new_players = []
         for cls, player_name in zip(player_classes, object_dict["player_hands"].keys()):
             new_players.append(cls(player_name, None))
@@ -169,3 +175,6 @@ class GameBoard:
                                                     object_dict["player_hands"].keys())))
 
         return new_game_board
+
+    def get_score(self):
+        return self.card_board.score()
