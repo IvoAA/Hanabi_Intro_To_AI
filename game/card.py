@@ -1,8 +1,7 @@
 from colorama import Fore
 from colorama import Style
 from constants.card_colors import CardColor
-from typing import Union
-
+from typing import Union, List
 
 NUMBERS = [1, 2, 3, 4, 5]
 
@@ -85,6 +84,13 @@ class Card:
             "color": self.color.value[0],
             "knowledge": self.knowledge.__to_dict__()
         }
+
+    def __eq__(self, other):
+        if type(other) == tuple and self.color == other[0] and self.number == other[1]:
+            return True
+        if type(other) == Card and self.color == other.color and self.number == other.number:
+            return True
+        return False
 
     @staticmethod
     def from_dict(object_dict: dict):

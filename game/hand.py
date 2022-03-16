@@ -2,6 +2,7 @@ import game.card
 
 from game.card import Card
 
+
 class Hand:
     def __init__(self, cards):
         self.cards = []
@@ -10,6 +11,9 @@ class Hand:
             raise Exception('Wrong number of cards given when creating Hand()')
 
         self.cards = cards
+
+    def get_cards(self):
+        return [card for card in self.cards if card]
 
     def get_player_n_cards(self):
         return len(self.cards)
@@ -20,13 +24,15 @@ class Hand:
     def get_existing_colors(self):
         colors = set()
         for card in self.cards:
-            colors.add(card.color)
+            if card is not None:
+                colors.add(card.color)
         return colors
 
     def get_existing_numbers(self):
         numbers = set()
         for card in self.cards:
-            numbers.add(card.number)
+            if card is not None:
+                numbers.add(card.number)
         return numbers
 
     def __str__(self):

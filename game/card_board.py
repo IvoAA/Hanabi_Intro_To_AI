@@ -35,6 +35,16 @@ class CardBoard:
                f"{Fore.GREEN}{self.goal[CardColor.GREEN]}" \
                f"{Style.RESET_ALL}"
 
+    def goal_played_cards(self):
+        played = []
+        for color in CardColor:
+            for i in range(0, self.goal[color]):
+                played.append(Card(color, i+1))
+        return played
+
+    def discarded_played_cards(self):
+        return self.discard
+
     def __str__(self):
         discard_pile = f"[ {', '.join(map(str, self.discard))} ]"
         return self._goal_board_str() + f" - {discard_pile}"

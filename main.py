@@ -26,7 +26,7 @@ def run_game(q=None):
     print("--- %s seconds ---" % (time.time() - start_time))
     print(f"Game over score - {score}, actions {engine.game_board.nr_actions}")
     if q:
-        q.put((score, engine.game_board.nr_actions))
+        q.put((score, engine.game_board.nr_actions, engine.game_board.finish_reason))
     return score, engine.game_board.nr_actions
 
 

@@ -1,4 +1,6 @@
 import concurrent.futures
+
+from constants.finish import Finish
 from utils.screen import enable_print, block_print
 from main import run_game
 from concurrent.futures import ThreadPoolExecutor
@@ -13,12 +15,18 @@ batches: int = 10
 batch_size: int = 10
 total_games = batches * batch_size
 
+
 def run_process():
     print(f"Starting {total_games} games. Might take a while (around 1min/50games).")
     block_print()
     start_time = time.time()
     total_score = 0
     total_plays = 0
+    out_lives = 0
+    empty_deck = 0
+    max_points = 0
+    best_score = 0
+    worst_score = 25
     q = multiprocessing.Queue()
     for batch in range(batches):
         print(f"Starting batch {batch}")
@@ -35,15 +43,32 @@ def run_process():
     q.put('STOP')
     l = dump_queue(q)
     for measure in l:
-        total_score += measure[0]
+        score = measure[0]
+        total_score += score
         total_plays += measure[1]
+        finish = measure[2]
+
+        if score > best_score:
+            best_score = score
+        if score < worst_score:
+            worst_score = score
+        if finish == Finish.EMPTY_DECK:
+            empty_deck += 1
+        if finish == Finish.MAX_POINT:
+            max_points += 1
+        if finish == Finish.NO_LIVE:
+            out_lives += 1
 
     enable_print()
     print("--- %s seconds ---" % (time.time() - start_time))
     print(
         f"Played {total_games} games with an average score of {total_score / total_games} and average number of plays "
         f"of {total_plays / total_games}")
-
+    print(f"OUT OF LIVES - {out_lives}")
+    print(f"EMPTY DECK - {empty_deck}")
+    print(f"MAX POINT - {max_points}")
+    print(f"BEST score {best_score}")
+    print(f"WORST score {worst_score}")
 
 
 def run_multiple_games():
@@ -78,6 +103,7 @@ def dump_queue(queue):
         result.append(i)
     time.sleep(.1)
     return result
+
 
 if __name__ == '__main__':
     run_process()
