@@ -1,5 +1,4 @@
-import copy
-
+import copy, logging, sys
 from game.deck import Deck
 from game.hand import Hand
 from game.card import Card, CardColor
@@ -7,6 +6,7 @@ from game.card_board import CardBoard
 from game.action import Action, ActionType
 from itertools import product
 
+log = logging.getLogger(__name__)
 
 class GameBoard:
     def __init__(self, players):
@@ -23,7 +23,7 @@ class GameBoard:
         self.nr_actions = 0
 
     def perform_action(self, player_id, action: Action):
-        print(f"Player: {player_id} action: {action}")
+        log.info(f"[PERFORM] Player: {player_id} action: {action}")
         self.nr_actions += 1
         if action.action_type == ActionType.PLAY:
             self.play_card(player_id, action.action_value)
@@ -34,7 +34,7 @@ class GameBoard:
 
 
     def perform_simulated_action(self, player_id, action: Action):
-        print(f"Player: {player_id} action: {action}")
+        log.debug(f"[SIMULATE] Player: {player_id} action: {action}")
         if action.action_type == ActionType.PLAY:
             return self.play_card_with_possibilities(player_id, action.action_value)
         elif action.action_type == ActionType.DISCARD:
@@ -125,7 +125,7 @@ class GameBoard:
             return
 
         if self.card_board.score() == 25:
-            print(f"Game finished congratulation!")
+            log.info(f"Game finished congratulation!")
             self.finished = True
             return
 
@@ -135,18 +135,18 @@ class GameBoard:
             self.turns_before_end -= 1
 
     def view(self):
-        print("Game view")
-        print(f"Remaining cards in Deck (end is drawn first):")
-        print(self.deck)
-        print()
-        print("Hands")
+        log.debug("Game view")
+        log.debug(f"Remaining cards in Deck (end is drawn first):")
+        log.debug(f"{str(self.deck)}")
+        log.debug("Hands")
         max_player_id_length = max(list(map(len, self.player_ids)))
         for player_id in self.player_ids:
-            print(f"\t{player_id:<{max_player_id_length}} hand: {self.player_hands[player_id]}")
+            log.debug(f"\t{player_id:<{max_player_id_length}} hand: {self.player_hands[player_id]}")
 
-        print()
-        print(self.card_board)
-        print(f"lives: {self.lives} \t\t coins: {self.coins} \t\t score: {self.card_board.score()}")
+        if log.level == logging.DEBUG:
+            log.debug(self.card_board)
+        log.info(self.card_board.__mini_str__())
+        log.info(f"lives: {self.lives} \t\t coins: {self.coins} \t\t score: {self.card_board.score()}")
 
     def __to_dict__(self):
         return {

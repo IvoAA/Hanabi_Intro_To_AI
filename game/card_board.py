@@ -27,14 +27,20 @@ class CardBoard:
             score += point
         return score
 
-    def __str__(self):
-        discard_pile = f"[ {', '.join(map(str, self.discard))} ]"
+    def _goal_board_str(self) -> str:
         return f"Goal board - {Fore.RED}{self.goal[CardColor.RED]} " \
                f"{Fore.BLUE}{self.goal[CardColor.BLUE]} " \
                f"{Fore.WHITE}{self.goal[CardColor.WHITE]} " \
                f"{Fore.YELLOW}{self.goal[CardColor.YELLOW]} " \
-               f"{Fore.GREEN}{self.goal[CardColor.GREEN]} \n" \
-               f"{Style.RESET_ALL}Discard pile - {discard_pile}"
+               f"{Fore.GREEN}{self.goal[CardColor.GREEN]}" \
+               f"{Style.RESET_ALL}"
+
+    def __str__(self):
+        discard_pile = f"[ {', '.join(map(str, self.discard))} ]"
+        return self._goal_board_str() + f" - {discard_pile}"
+
+    def __mini_str__(self):
+        return self._goal_board_str() + f" - # discard_pile: {len(self.discard)}"
 
     def __to_dict__(self):
         return_dict = {

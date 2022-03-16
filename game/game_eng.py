@@ -1,13 +1,16 @@
+import logging
 import os
 
 from colorama import Fore
-
+import logging
 from game.game_board import GameBoard
 from constants.player_type import PlayerType
 from agent.human_player import HumanPlayer
 from agent.AI.alpha import Alpha
 from agent.AI.beta import Beta
 import utils.screen as Screen
+
+log = logging.getLogger(__name__)
 
 INIT = 0
 SELECT_N_PLAYERS = 1
@@ -51,9 +54,7 @@ class GameEngine:
             self.players[curr_player].play()
             curr_player = (curr_player + 1) % self.n_players
             self.game_board.evaluate_game_finish()
-
-        print()
-        print(f"{Fore.MAGENTA}GAME OVER FELLA")
+        log.error(f"{Fore.MAGENTA}GAME OVER FELLA")
 
     def print_game_state(self):
         Screen.clear_screen()
