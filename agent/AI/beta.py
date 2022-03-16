@@ -1,5 +1,3 @@
-import math
-import random
 import logging
 from game.game_board import GameBoard
 from agent.player import Player
@@ -43,7 +41,7 @@ def eval_view(game_view: StateView):
                 k_number = k_numbers[0]
                 # if the agent knows a playable card
                 if game_view.goal.get(k_colors[0]) == k_number - 1:
-                    sure_plays[i] += k_number
+                    sure_plays[i] += 6 - k_number
 
                 # the agent knows a card can be discarded
                 elif game_view.goal.get(k_colors[0]) < k_number - 1:
@@ -76,16 +74,16 @@ def eval_view(game_view: StateView):
                             is_sure = False
 
                     if is_sure:
-                        sure_plays[i] += k_number
+                        sure_plays[i] += 6 - k_number
                     else:
                         known_numbers[i] += 1
 
                 # if all cards on board are higher than max value for this card, discard
-                if min(game_view.goal.values()) > max(k_numbers):
+                if min_goal > max(k_numbers):
                     sure_discards[i] += 1
 
                 # if all cards on board are lower than min value for this card, then it will be playable
-                elif max(game_view.goal.values()) < min(k_numbers):
+                elif max_goal < min(k_numbers):
                     known_playable_numbers[i] += 1
 
     for i in range(len(game_view.player_ids)):
@@ -133,14 +131,14 @@ class Beta(Player):
 
         lives_lost = lives_before - probability_lives_after
         diff_score = probability_score_after - score_before
-        perc_coins_used = 0 if not coins_before else probability_coins_after / coins_before
+        perc_coins_used = (probability_coins_after+1) / (coins_before+1)
 
         e = eval_view(StateView(new_game_boards[0].get("board"), self.player_id, 1))
 
         if action.action_type != ActionType.DISCARD:
             e += 25
         e += 25 * perc_coins_used
-        e += 100 * math.log(diff_score*10, 10) if diff_score > 0 else 0
+        e += 100 * diff_score
         e *= 1 - min(0.75, lives_lost*2)
 
         return e
