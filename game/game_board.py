@@ -1,5 +1,7 @@
-import copy
+import copy, logging
 
+from agent.AI.card_counter import CardCounter
+from constants.finish import Finish
 from game.deck import Deck
 from game.hand import Hand
 from game.card import Card, CardColor
@@ -7,6 +9,7 @@ from game.card_board import CardBoard
 from game.action import Action, ActionType
 from itertools import product
 
+log = logging.getLogger(__name__)
 
 class GameBoard:
     def __init__(self, players):
@@ -21,9 +24,10 @@ class GameBoard:
         self.turns_before_end = len(self.player_ids) + 1
         self.card_board = CardBoard()
         self.nr_actions = 0
+        self.finish_reason = None
 
     def perform_action(self, player_id, action: Action):
-        print(f"Player: {player_id} action: {action}")
+        log.info(f"[PERFORM] Player: {player_id} action: {action}")
         self.nr_actions += 1
         if action.action_type == ActionType.PLAY:
             self.play_card(player_id, action.action_value)
@@ -48,6 +52,11 @@ class GameBoard:
         possible_colors = player_card.knowledge.possible_colors
         possible_numbers = player_card.knowledge.possible_numbers
         all_possibilities = list(product(possible_colors, possible_numbers))
+        remaining_cards = CardCounter.remaining_cards(self, player_id)
+        for possibility in all_possibilities:
+            if not remaining_cards.__contains__(possibility):
+                all_possibilities.remove(possibility)
+
         if len(all_possibilities) == 1:
             new_board = copy.deepcopy(self)
             new_board.play_card(player_id, card_idx)
@@ -75,6 +84,8 @@ class GameBoard:
             self.lives -= 1
         if not self.deck.is_empty():
             self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
+        else:
+            self.player_hands[player_id].cards[card_idx] = None
         return result
 
     def discard_card(self, player_id, card_idx):
@@ -83,12 +94,15 @@ class GameBoard:
         self.card_board.discard_card(self.player_hands[player_id].cards[card_idx])
         if not self.deck.is_empty():
             self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
+        else:
+            self.player_hands[player_id].cards[card_idx] = None
         self.coins += 1
         return True
 
     def hint(self, player_id, action: Action):
         for card in self.player_hands[action.effected_player_id].cards:
-            card.give_hint(action.action_value)
+            if card is not None:
+                card.give_hint(action.action_value)
         self.coins -= 1
 
     def give_cards(self):
@@ -122,31 +136,34 @@ class GameBoard:
     def evaluate_game_finish(self):
         if self.lives == 0:
             self.finished = True
+            self.finish_reason = Finish.NO_LIVE
             return
 
         if self.card_board.score() == 25:
-            print(f"Game finished congratulation!")
+            log.info(f"Game finished congratulation!")
             self.finished = True
+            self.finish_reason = Finish.MAX_POINT
             return
 
         if self.deck.is_empty():
             if self.turns_before_end == 0:
                 self.finished = True
+                self.finish_reason = Finish.EMPTY_DECK
             self.turns_before_end -= 1
 
     def view(self):
-        print("Game view")
-        print(f"Remaining cards in Deck (end is drawn first):")
-        print(self.deck)
-        print()
-        print("Hands")
+        log.debug("Game view")
+        log.debug(f"Remaining cards in Deck (end is drawn first):")
+        log.debug(f"{str(self.deck)}")
+        log.debug("Hands")
         max_player_id_length = max(list(map(len, self.player_ids)))
         for player_id in self.player_ids:
-            print(f"\t{player_id:<{max_player_id_length}} hand: {self.player_hands[player_id]}")
+            log.debug(f"\t{player_id:<{max_player_id_length}} hand: {self.player_hands[player_id]}")
 
-        print()
-        print(self.card_board)
-        print(f"lives: {self.lives} \t\t coins: {self.coins} \t\t score: {self.card_board.score()}")
+        if log.level == logging.DEBUG:
+            log.debug(self.card_board)
+        log.info(self.card_board.__mini_str__())
+        log.info(f"lives: {self.lives} \t\t coins: {self.coins} \t\t score: {self.card_board.score()}")
 
     def __to_dict__(self):
         return {

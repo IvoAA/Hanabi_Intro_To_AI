@@ -24,6 +24,8 @@ class Action:
     def get_player_card_actions(state_view: StateView, action_type: ActionType):
         actions = []
         for index, card in enumerate(state_view.get_current_player_hand().cards):
+            if card is None:
+                continue
             actions.append(Action(action_type, index, state_view.get_current_player_id()))
         return actions
 
