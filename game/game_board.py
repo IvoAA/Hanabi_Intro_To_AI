@@ -49,7 +49,9 @@ class GameBoard:
         possible_numbers = player_card.knowledge.possible_numbers
         all_possibilities = list(product(possible_colors, possible_numbers))
         if len(all_possibilities) == 1:
-            return [{"probability": 1, "board": copy.deepcopy(self).play_card(player_id, card_idx)}]
+            new_board = copy.deepcopy(self)
+            new_board.play_card(player_id, card_idx)
+            return [{"probability": 1, "board": new_board}]
 
         copied_boards = [copy.deepcopy(self) for _ in range(len(all_possibilities))]
         possible_boards = []
@@ -149,7 +151,8 @@ class GameBoard:
     def __to_dict__(self):
         return {
             "deck": self.deck.__to_list__(),
-            "player_hands": dict(list(map(lambda x: (x, self.player_hands[x].__to_list__()), self.player_hands.keys()))),
+            "player_hands": dict(
+                list(map(lambda x: (x, self.player_hands[x].__to_list__()), self.player_hands.keys()))),
             "coins": self.coins,
             "lives": self.lives,
             "card_board": self.card_board.__to_dict__()
@@ -172,3 +175,6 @@ class GameBoard:
                                                     object_dict["player_hands"].keys())))
 
         return new_game_board
+
+    def get_score(self):
+        return self.card_board.score()
