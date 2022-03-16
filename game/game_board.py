@@ -7,6 +7,7 @@ from game.card_board import CardBoard
 from game.action import Action, ActionType
 from itertools import product
 
+
 class GameBoard:
     def __init__(self, players):
         self.deck = Deck()
@@ -19,15 +20,18 @@ class GameBoard:
         self.finished = False
         self.turns_before_end = len(self.player_ids) + 1
         self.card_board = CardBoard()
+        self.nr_actions = 0
 
     def perform_action(self, player_id, action: Action):
         print(f"Player: {player_id} action: {action}")
+        self.nr_actions += 1
         if action.action_type == ActionType.PLAY:
             self.play_card(player_id, action.action_value)
         elif action.action_type == ActionType.DISCARD:
             self.discard_card(player_id, action.action_value)
         elif action.action_type == ActionType.HINT:
             self.hint(player_id, action)
+
 
     def perform_simulated_action(self, player_id, action: Action):
         print(f"Player: {player_id} action: {action}")
@@ -136,8 +140,9 @@ class GameBoard:
         print(self.deck)
         print()
         print("Hands")
+        max_player_id_length = max(list(map(len, self.player_ids)))
         for player_id in self.player_ids:
-            print(f"\t{player_id} hand: {self.player_hands[player_id]}")
+            print(f"\t{player_id:<{max_player_id_length}} hand: {self.player_hands[player_id]}")
 
         print()
         print(self.card_board)
