@@ -15,15 +15,6 @@ logging.basicConfig(format="{filename}:{lineno} {asctime} {levelname[0]} - {mess
                     stream=sys.stdout,
                     style='{')
 
-log = logging.getLogger(__name__)
-
-# noinspection PyArgumentList
-logging.basicConfig(format="{filename}:{lineno} {asctime} {levelname[0]} - {message}",
-                    datefmt="%H:%M:%S",
-                    level=logging.INFO,
-                    stream=sys.stdout,
-                    style='{')
-
 def run_game(q=None):
     start_time = time.time()
     colorama.init(autoreset=True)

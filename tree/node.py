@@ -78,7 +78,7 @@ class GroupedNode(Node):
 
     def get_propagated_value(self):
         # Numpy vector product
-        return np.array(list(map(lambda x: x.propagated_value, self.nodes))) @ np.array(list(map(lambda x: x.probability, self.nodes)))
+        return np.array(list(map(lambda x: x.get_propagated_value(), self.nodes))) @ np.array(list(map(lambda x: x.probability, self.nodes)))
 
     def __str__(self):
         return f"{super().__str__()} #_nodes: {len(self.nodes)} expected_value: {self.expected_value()} "

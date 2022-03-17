@@ -8,6 +8,7 @@ from constants.player_type import PlayerType
 from agent.human_player import HumanPlayer
 from agent.AI.alpha import Alpha
 from agent.AI.beta import Beta
+from agent.AI.charlie import Charlie
 import utils.screen as Screen
 
 log = logging.getLogger(__name__)
@@ -44,6 +45,8 @@ class GameEngine:
                 self.players.append(Alpha(p_name))
             elif p_type == PlayerType.BETA:
                 self.players.append(Beta(p_name))
+            elif p_type == PlayerType.CHARLIE:
+                self.players.append(Charlie(p_name))
         self.state = INITIATE_PLAYERS
 
     def start_game(self):

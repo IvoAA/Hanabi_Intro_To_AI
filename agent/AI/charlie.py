@@ -106,9 +106,21 @@ def eval_view(game_view: StateView):
     return evaluation
 
 
-class Beta(Player):
+class Charlie(Player):
     def __init__(self, player_id: str):
         super().__init__(player_id)
+        self.tree_builder = None
+
+    def explore_node(self, node: SingleNode, next_player: str):
+        self.game_view = StateView(node.board, next_player)
+
+        actions = Action.get_possible_actions(self.game_view, "" if node.depth == 1 else self.player_id)
+        for index, action in enumerate(actions):
+            evaluation, probabilities, game_boards = self.evaluate_action(action, copy.deepcopy(self.game_board))
+            if len(evaluation) == 1:
+                self.tree_builder.insert_board(game_boards[0], evaluation[0], action, predecessor_node=node)
+            else:
+                self.tree_builder.insert_multiple_boards(game_boards, evaluation, probabilities, action, node)
 
     def play(self):
         log.debug(f"Turn of {self.player_id}")
@@ -117,30 +129,32 @@ class Beta(Player):
 
         root_node = SingleNode(depth=0, predecessor=None, action=None, probability=1, board=self.game_board, value=0)
         root_node.is_root = True
-        tree_builder = TreeBuilder(root_node)
+        self.tree_builder = TreeBuilder(root_node)
 
         max_depth = 2
 
         while True:
-            next_node_to_expand = tree_builder.get_node_to_expand()
+            next_node_to_expand = self.tree_builder.get_node_to_expand()
             if next_node_to_expand.depth > 1:
                 break
+
             if isinstance(next_node_to_expand, GroupedNode):
+                nodes_to_explore = next_node_to_expand.nodes
+            else:
+                nodes_to_explore = [next_node_to_expand]
+
+            if len(nodes_to_explore) > 10:
                 continue
-            current_depth = next_node_to_expand.depth
-            own_idx = self.game_board.player_ids.index(self.player_id)
-            next_player = self.game_board.player_ids[(own_idx + current_depth) % len(self.game_board.player_ids)]
-            self.game_view = StateView(next_node_to_expand.board, next_player)
 
-            actions = Action.get_possible_actions(self.game_view, "" if next_node_to_expand.depth == 1 else self.player_id)
-            for index, action in enumerate(actions):
-                evaluation, probabilities, game_boards = self.evaluate_action(action, copy.deepcopy(self.game_board))
-                if len(evaluation) == 1:
-                    tree_builder.insert_board(game_boards[0], evaluation[0], action, predecessor_node=next_node_to_expand)
-                else:
-                    tree_builder.insert_multiple_boards(game_boards, evaluation, probabilities, action, next_node_to_expand)
+            for node in nodes_to_explore:
+                current_depth = next_node_to_expand.depth
+                own_idx = self.game_board.player_ids.index(self.player_id)
+                next_player = self.game_board.player_ids[(own_idx + current_depth) % len(self.game_board.player_ids)]
+                self.game_view = StateView(node.board, next_player)
 
-        action_to_perform = tree_builder.max_max()
+                self.explore_node(node, next_player)
+
+        action_to_perform = self.tree_builder.max_max()
         self.game_board.perform_action(self.player_id, action_to_perform)
 
     def evaluate_action(self, action: Action, game_board: GameBoard) -> (List[int], List[float], List[GameBoard]):
