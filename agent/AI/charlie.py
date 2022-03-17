@@ -18,6 +18,9 @@ log = logging.getLogger(__name__)
 
 
 def eval_view(game_view: StateView):
+    if sum(game_view.goal.values()) == 25:
+        return 5000
+
     evaluation = 0
 
     sure_plays = [0]*len(game_view.player_ids)
@@ -27,6 +30,12 @@ def eval_view(game_view: StateView):
     known_numbers = [0]*len(game_view.player_ids)
 
     known_colors = [0]*len(game_view.player_ids)
+
+    discarded_valuable_cards = 0
+
+    for card in game_view.discarded:
+        if game_view.goal[card.color] < card.number:
+            discarded_valuable_cards += card.number
 
     for i, hand in enumerate(game_view.get_ordered_hands()):
         for card in hand.cards:
@@ -95,7 +104,7 @@ def eval_view(game_view: StateView):
                 elif max_goal < min(k_numbers):
                     known_playable_numbers[i] += 1
 
-    p_eval = 0
+    p_eval = discarded_valuable_cards
     for i in range(len(game_view.player_ids)):
         p_eval += 10 * sure_plays[i]
         p_eval += 5 * sure_discards[i]
@@ -104,7 +113,7 @@ def eval_view(game_view: StateView):
         p_eval += 1 * known_colors[i]
 
         # give diff importance to diff players (e.g. [1, 0.9, 0.8, ...]
-        evaluation += p_eval * (1 - i*0.1)
+        evaluation += p_eval * (1 - i*0.2)
 
     return evaluation
 
@@ -115,11 +124,11 @@ class Charlie(Player):
         self.tree_builder = None
 
     def explore_node(self, node: SingleNode, next_player: str):
-        self.game_view = StateView(node.board, next_player)
+        node_view = StateView(node.board, next_player)
 
-        actions = Action.get_possible_actions(self.game_view, "" if node.depth == 1 else self.player_id)
+        actions = Action.get_possible_actions(node_view, self.player_id)
         for index, action in enumerate(actions):
-            evaluation, probabilities, game_boards = self.evaluate_action(action, copy.deepcopy(self.game_board))
+            evaluation, probabilities, game_boards = Charlie.evaluate_action(self.player_id, action, copy.deepcopy(node.board))
             if len(evaluation) == 1:
                 self.tree_builder.insert_board(game_boards[0], evaluation[0], action, predecessor_node=node)
             else:
@@ -141,7 +150,7 @@ class Charlie(Player):
 
         while True:
             next_node_to_expand = self.tree_builder.get_node_to_expand()
-            if next_node_to_expand.depth > 1:
+            if next_node_to_expand.depth > max_depth - 1:
                 break
 
             if isinstance(next_node_to_expand, GroupedNode):
@@ -163,8 +172,9 @@ class Charlie(Player):
         action_to_perform = self.tree_builder.max_max()
         self.game_board.perform_action(self.player_id, action_to_perform)
 
-    def evaluate_action(self, action: Action, game_board: GameBoard) -> (List[int], List[float], List[GameBoard]):
-        new_game_boards = game_board.perform_simulated_action(self.player_id, action)
+    @staticmethod
+    def evaluate_action(player_id, action: Action, game_board: GameBoard) -> (List[int], List[float], List[GameBoard]):
+        new_game_boards = game_board.perform_simulated_action(player_id, action)
         probability_lives_after = sum(list(map(lambda r: r.get("probability") * r.get("board").lives, new_game_boards)))
         probability_score_after = sum(list(map(lambda r: r.get("probability") * r.get("board").get_score(), new_game_boards)))
         probability_coins_after = sum(list(map(lambda r: r.get("probability") * r.get("board").coins, new_game_boards)))
@@ -172,19 +182,26 @@ class Charlie(Player):
         all_evaluations = []
         all_probabilities = []
         all_game_boards = []
-        for board in new_game_boards:
+        for p_board in new_game_boards:
+            board = p_board.get("board")
+            turns_left = board.count_remaining_cards() + len(board.player_ids)
 
-            e = eval_view(StateView(board.get("board"), self.player_id, 1))
+            if probability_lives_after == 0:
+                e = probability_score_after
+            else:
+                e = 1000 * probability_lives_after
+                e += 300 * probability_score_after
+                e += 25 * min(probability_coins_after, turns_left-2*probability_coins_after)
 
-            turns_left = board.get("board").count_remaining_cards() + 4
+                if turns_left > len(board.player_ids) + 2:
+                    e += eval_view(StateView(board, player_id, 1))
 
-            e += 25 * min(probability_coins_after, turns_left-2*probability_coins_after)
-            e += 300 * probability_score_after
-            e += 500 * probability_lives_after
+                if probability_lives_after < 1:
+                    e /= 2
 
             all_evaluations.append(e)
-            all_probabilities.append(board.get("probability"))
-            all_game_boards.append(board.get("board"))
+            all_probabilities.append(p_board.get("probability"))
+            all_game_boards.append(board)
 
         return all_evaluations, all_probabilities, all_game_boards
 
