@@ -1,6 +1,9 @@
 import math
 import random
 import logging
+
+from agent.AI.card_counter import CardCounter
+from game.card import CardKnowledge
 from game.game_board import GameBoard
 from agent.player import Player
 from agent.state_view import StateView
@@ -47,7 +50,7 @@ def eval_view(game_view: StateView):
                 k_number = k_numbers[0]
                 # if the agent knows a playable card
                 if game_view.goal.get(k_colors[0]) == k_number - 1:
-                    sure_plays[i] += k_number
+                    sure_plays[i] += math.ceil((6 - k_number) / 2)
 
                 # the agent knows a card can be discarded
                 elif game_view.goal.get(k_colors[0]) < k_number - 1:
@@ -80,21 +83,21 @@ def eval_view(game_view: StateView):
                             is_sure = False
 
                     if is_sure:
-                        sure_plays[i] += k_number
+                        sure_plays[i] += math.ceil((6 - k_number) / 2)
                     else:
                         known_numbers[i] += 1
 
                 # if all cards on board are higher than max value for this card, discard
-                if min(game_view.goal.values()) > max(k_numbers):
+                if min_goal > max(k_numbers):
                     sure_discards[i] += 1
 
                 # if all cards on board are lower than min value for this card, then it will be playable
-                elif max(game_view.goal.values()) < min(k_numbers):
+                elif max_goal < min(k_numbers):
                     known_playable_numbers[i] += 1
 
+    p_eval = 0
     for i in range(len(game_view.player_ids)):
-        p_eval = 0
-        p_eval += 15 * sure_plays[i]
+        p_eval += 10 * sure_plays[i]
         p_eval += 5 * sure_discards[i]
         p_eval += 3 * known_playable_numbers[i]
         p_eval += 2 * known_numbers[i]
@@ -124,6 +127,9 @@ class Charlie(Player):
 
     def play(self):
         log.debug(f"Turn of {self.player_id}")
+
+        self.count_cards()
+
         # idx starts always with zero
         self.game_view: StateView
 
@@ -158,32 +164,71 @@ class Charlie(Player):
         self.game_board.perform_action(self.player_id, action_to_perform)
 
     def evaluate_action(self, action: Action, game_board: GameBoard) -> (List[int], List[float], List[GameBoard]):
-        lives_before = game_board.lives
-        score_before = game_board.get_score()
-        coins_before = game_board.coins
-
         new_game_boards = game_board.perform_simulated_action(self.player_id, action)
         probability_lives_after = sum(list(map(lambda r: r.get("probability") * r.get("board").lives, new_game_boards)))
         probability_score_after = sum(list(map(lambda r: r.get("probability") * r.get("board").get_score(), new_game_boards)))
         probability_coins_after = sum(list(map(lambda r: r.get("probability") * r.get("board").coins, new_game_boards)))
 
-        lives_lost = lives_before - probability_lives_after
-        diff_score = probability_score_after - score_before
-        perc_coins_used = 0 if not coins_before else probability_coins_after / coins_before
-
         all_evaluations = []
         all_probabilities = []
         all_game_boards = []
         for board in new_game_boards:
+
             e = eval_view(StateView(board.get("board"), self.player_id, 1))
-            if action.action_type != ActionType.DISCARD:
-                e += 25
-            e += 25 * perc_coins_used
-            e += 100 * math.log(diff_score*10, 10) if diff_score > 0 else 0
-            e *= 1 - min(0.75, lives_lost*2)
+
+            turns_left = board.get("board").count_remaining_cards() + 4
+
+            e += 25 * min(probability_coins_after, turns_left-2*probability_coins_after)
+            e += 300 * probability_score_after
+            e += 500 * probability_lives_after
 
             all_evaluations.append(e)
             all_probabilities.append(board.get("probability"))
             all_game_boards.append(board.get("board"))
 
         return all_evaluations, all_probabilities, all_game_boards
+
+    # if by looking at the hands of the other players, the goal board, and the discarded cards
+    # it's possible to deduce that a card is not of a given number/color previously thought possible
+    # -> update knowledge of said card
+    def count_cards(self):
+        remaining_cards = CardCounter.remaining_cards(self.game_board, self.player_id)
+
+        # from the cards the current player could possible have, which colors would be possible for each number
+        remaining_colors = {
+            1: [],
+            2: [],
+            3: [],
+            4: [],
+            5: []
+        }
+
+        for card in remaining_cards:
+            if card.color not in remaining_colors[card.number]:
+                remaining_colors[card.number].append(card.color)
+
+        for card in self.game_board.player_hands[self.player_id].cards:
+            if not card:
+                continue
+
+            card_knowledge: CardKnowledge = card.knowledge
+
+            color_not_possible = {}
+            for color in card_knowledge.possible_colors:
+                color_not_possible[color] = True
+
+            for number in card_knowledge.possible_numbers:
+
+                # no remaining cards
+                number_not_possible = True
+                for color in card_knowledge.possible_colors:
+                    if color in remaining_colors[number]:
+                        number_not_possible = False
+                        color_not_possible[color] = False
+
+                if number_not_possible:
+                    card_knowledge.update_numbers(number, False)
+
+            for color in color_not_possible:
+                if color_not_possible[color]:
+                    card_knowledge.update_numbers(color, False)

@@ -61,6 +61,7 @@ class TreeBuilder:
             node: Node
             node.predecessor.update_propagated_value(node.get_propagated_value())
 
+        action_nodes.sort(key=lambda x: x.expected_value(), reverse=True)
         action_nodes.sort(key=lambda x: x.get_propagated_value(), reverse=True)
 
         return action_nodes[0].action

@@ -201,3 +201,6 @@ class GameBoard:
 
     def get_score(self):
         return self.card_board.score()
+
+    def count_remaining_cards(self):
+        return len(self.deck.cards)
