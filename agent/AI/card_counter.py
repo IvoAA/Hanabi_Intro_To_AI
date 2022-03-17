@@ -34,14 +34,17 @@ class CardCounter:
 
         other_players = copy.deepcopy(game_board.player_ids)
         other_players.remove(player_id)
+
         for player in other_players:
             cards = game_board.player_hands[player].cards
             played_cards.extend(cards)
+
         # remove Nones
         played_cards = [card for card in played_cards if card]
 
         for card in played_cards:
-            remaining.remove(card)
+            if card in remaining:
+                remaining.remove(card)
 
         return remaining
 

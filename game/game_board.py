@@ -52,6 +52,7 @@ class GameBoard:
         possible_colors = player_card.knowledge.possible_colors
         possible_numbers = player_card.knowledge.possible_numbers
         all_possibilities = list(product(possible_colors, possible_numbers))
+
         remaining_cards = CardCounter.remaining_cards(self, player_id)
         for possibility in all_possibilities:
             if not remaining_cards.__contains__(possibility):

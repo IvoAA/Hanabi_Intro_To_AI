@@ -25,17 +25,19 @@ def eval_view(game_view: StateView):
 
     sure_plays = [0]*len(game_view.player_ids)
     sure_discards = [0]*len(game_view.player_ids)
-    # TODO evaluate badly if important cards have been discarded (e.g. 5)
+
     known_playable_numbers = [0]*len(game_view.player_ids)
     known_numbers = [0]*len(game_view.player_ids)
 
     known_colors = [0]*len(game_view.player_ids)
 
-    discarded_valuable_cards = 0
+    discarded_card_multiplier = 5
+    # 110 = sum of all cards values
+    discarded_valuable_cards_eval = 110 * discarded_card_multiplier
 
     for card in game_view.discarded:
         if game_view.goal[card.color] < card.number:
-            discarded_valuable_cards += card.number
+            discarded_valuable_cards_eval -= card.number * discarded_card_multiplier
 
     for i, hand in enumerate(game_view.get_ordered_hands()):
         for card in hand.cards:
@@ -59,7 +61,7 @@ def eval_view(game_view: StateView):
                 k_number = k_numbers[0]
                 # if the agent knows a playable card
                 if game_view.goal.get(k_colors[0]) == k_number - 1:
-                    sure_plays[i] += math.ceil((6 - k_number) / 2)
+                    sure_plays[i] += 1
 
                 # the agent knows a card can be discarded
                 elif game_view.goal.get(k_colors[0]) < k_number - 1:
@@ -92,7 +94,7 @@ def eval_view(game_view: StateView):
                             is_sure = False
 
                     if is_sure:
-                        sure_plays[i] += math.ceil((6 - k_number) / 2)
+                        sure_plays[i] += 1
                     else:
                         known_numbers[i] += 1
 
@@ -104,10 +106,10 @@ def eval_view(game_view: StateView):
                 elif max_goal < min(k_numbers):
                     known_playable_numbers[i] += 1
 
-    p_eval = discarded_valuable_cards
+    p_eval = discarded_valuable_cards_eval
     for i in range(len(game_view.player_ids)):
-        p_eval += 10 * sure_plays[i]
-        p_eval += 5 * sure_discards[i]
+        p_eval += 25 * sure_plays[i]
+        p_eval += 10 * sure_discards[i]
         p_eval += 3 * known_playable_numbers[i]
         p_eval += 2 * known_numbers[i]
         p_eval += 1 * known_colors[i]
@@ -128,7 +130,7 @@ class Charlie(Player):
 
         actions = Action.get_possible_actions(node_view, self.player_id)
         for index, action in enumerate(actions):
-            evaluation, probabilities, game_boards = Charlie.evaluate_action(self.player_id, action, copy.deepcopy(node.board))
+            evaluation, probabilities, game_boards = Charlie.evaluate_action(next_player, action, copy.deepcopy(node.board))
             if len(evaluation) == 1:
                 self.tree_builder.insert_board(game_boards[0], evaluation[0], action, predecessor_node=node)
             else:
@@ -189,7 +191,7 @@ class Charlie(Player):
             if probability_lives_after == 0:
                 e = probability_score_after
             else:
-                e = 1000 * probability_lives_after
+                e = 1250 * probability_lives_after
                 e += 300 * probability_score_after
                 e += 25 * min(probability_coins_after, turns_left-2*probability_coins_after)
 
