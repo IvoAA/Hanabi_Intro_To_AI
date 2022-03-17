@@ -1,6 +1,8 @@
 import logging
 import math
 
+from agent.AI.card_counter import CardCounter
+from game.card import CardKnowledge
 from game.game_board import GameBoard
 from agent.player import Player
 from agent.state_view import StateView
@@ -109,6 +111,9 @@ class Beta(Player):
     def play(self):
         log.debug(f"Turn of {self.player_id}")
         self.game_view = StateView(self.game_board, self.player_id)
+
+        self.count_cards()
+
         # idx starts always with zero
         self.game_view: StateView
         actions = Action.get_possible_actions(self.game_view)
@@ -135,5 +140,48 @@ class Beta(Player):
 
         return e
 
+    # if by looking at the hands of the other players, the goal board, and the discarded cards
+    # it's possible to deduce that a card is not of a given number/color previously thought possible
+    # -> update knowledge of said card
+    def count_cards(self):
+        remaining_cards = CardCounter.remaining_cards(self.game_board, self.player_id)
 
+        # from the cards the current player could possible have, which colors would be possible for each number
+        remaining_colors = {
+            1: [],
+            2: [],
+            3: [],
+            4: [],
+            5: []
+        }
+
+        for card in remaining_cards:
+            if card.color not in remaining_colors[card.number]:
+                remaining_colors[card.number].append(card.color)
+
+        for card in self.game_board.player_hands[self.player_id].cards:
+            if not card:
+                continue
+
+            card_knowledge: CardKnowledge = card.knowledge
+
+            color_not_possible = {}
+            for color in card_knowledge.possible_colors:
+                color_not_possible[color] = True
+
+            for number in card_knowledge.possible_numbers:
+
+                # no remaining cards
+                number_not_possible = True
+                for color in card_knowledge.possible_colors:
+                    if color in remaining_colors[number]:
+                        number_not_possible = False
+                        color_not_possible[color] = False
+
+                if number_not_possible:
+                    card_knowledge.update_numbers(number, False)
+
+            for color in color_not_possible:
+                if color_not_possible[color]:
+                    card_knowledge.update_numbers(color, False)
 

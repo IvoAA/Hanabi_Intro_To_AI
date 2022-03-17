@@ -87,10 +87,11 @@ class GameBoard:
             if card.number == 5:
                 self.coins = min(8, self.coins + 1)
 
-            if not self.deck.is_empty():
-                self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
-            else:
-                self.player_hands[player_id].cards[card_idx] = None
+        if not self.deck.is_empty():
+            self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
+        else:
+            self.player_hands[player_id].cards[card_idx] = None
+
         return result
 
     def discard_card(self, player_id, card_idx):
@@ -167,7 +168,7 @@ class GameBoard:
 
         if log.level == logging.DEBUG:
             log.debug(self.card_board)
-        log.info(self.card_board.__mini_str__())
+        log.info(self.card_board)
         log.info(f"lives: {self.lives} \t\t coins: {self.coins} \t\t score: {self.card_board.score()}")
 
     def __to_dict__(self):
