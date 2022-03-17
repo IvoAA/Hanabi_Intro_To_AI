@@ -11,6 +11,7 @@ from itertools import product
 
 log = logging.getLogger(__name__)
 
+
 class GameBoard:
     def __init__(self, players):
         self.deck = Deck()
@@ -34,17 +35,16 @@ class GameBoard:
         elif action.action_type == ActionType.DISCARD:
             self.discard_card(player_id, action.action_value)
         elif action.action_type == ActionType.HINT:
-            self.hint(player_id, action)
-
+            self.hint(action)
 
     def perform_simulated_action(self, player_id, action: Action):
-        #log.debug(f"[SIMULATE] Player: {player_id} action: {action}")
+        # log.debug(f"[SIMULATE] Player: {player_id} action: {action}")
         if action.action_type == ActionType.PLAY:
             return self.play_card_with_possibilities(player_id, action.action_value)
         elif action.action_type == ActionType.DISCARD:
             self.discard_card(player_id, action.action_value)
         elif action.action_type == ActionType.HINT:
-            self.hint(player_id, action)
+            self.hint(action)
         return [{"probability": 1, "board": copy.deepcopy(self)}]
 
     def play_card_with_possibilities(self, player_id, card_idx: int):
@@ -79,13 +79,18 @@ class GameBoard:
         self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
 
     def play_card(self, player_id, card_idx) -> bool:
-        result = self.card_board.play_card(self.player_hands[player_id].cards[card_idx])
+        card = self.player_hands[player_id].cards[card_idx]
+        result = self.card_board.play_card(card)
         if not result:
             self.lives -= 1
-        if not self.deck.is_empty():
-            self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
         else:
-            self.player_hands[player_id].cards[card_idx] = None
+            if card.number == 5:
+                self.coins = min(8, self.coins + 1)
+
+            if not self.deck.is_empty():
+                self.player_hands[player_id].cards[card_idx] = self.deck.get_card()
+            else:
+                self.player_hands[player_id].cards[card_idx] = None
         return result
 
     def discard_card(self, player_id, card_idx):
@@ -99,7 +104,7 @@ class GameBoard:
         self.coins += 1
         return True
 
-    def hint(self, player_id, action: Action):
+    def hint(self, action: Action):
         for card in self.player_hands[action.effected_player_id].cards:
             if card is not None:
                 card.give_hint(action.action_value)

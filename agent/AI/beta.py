@@ -1,4 +1,6 @@
 import logging
+import math
+
 from game.game_board import GameBoard
 from agent.player import Player
 from agent.state_view import StateView
@@ -41,7 +43,7 @@ def eval_view(game_view: StateView):
                 k_number = k_numbers[0]
                 # if the agent knows a playable card
                 if game_view.goal.get(k_colors[0]) == k_number - 1:
-                    sure_plays[i] += 6 - k_number
+                    sure_plays[i] += math.ceil((6 - k_number) / 2)
 
                 # the agent knows a card can be discarded
                 elif game_view.goal.get(k_colors[0]) < k_number - 1:
@@ -74,7 +76,7 @@ def eval_view(game_view: StateView):
                             is_sure = False
 
                     if is_sure:
-                        sure_plays[i] += 6 - k_number
+                        sure_plays[i] += math.ceil((6 - k_number) / 2)
                     else:
                         known_numbers[i] += 1
 
@@ -86,9 +88,9 @@ def eval_view(game_view: StateView):
                 elif max_goal < min(k_numbers):
                     known_playable_numbers[i] += 1
 
+    p_eval = 0
     for i in range(len(game_view.player_ids)):
-        p_eval = 0
-        p_eval += 15 * sure_plays[i]
+        p_eval += 10 * sure_plays[i]
         p_eval += 5 * sure_discards[i]
         p_eval += 3 * known_playable_numbers[i]
         p_eval += 2 * known_numbers[i]
@@ -120,26 +122,16 @@ class Beta(Player):
         self.game_board.perform_action(self.player_id, action_to_perform)
 
     def evaluate_board(self, action: Action, game_board: GameBoard) -> int:
-        lives_before = game_board.lives
-        score_before = game_board.get_score()
-        coins_before = game_board.coins
-
         new_game_boards = game_board.perform_simulated_action(self.player_id, action)
         probability_lives_after = sum(list(map(lambda r: r.get("probability") * r.get("board").lives, new_game_boards)))
         probability_score_after = sum(list(map(lambda r: r.get("probability") * r.get("board").get_score(), new_game_boards)))
         probability_coins_after = sum(list(map(lambda r: r.get("probability") * r.get("board").coins, new_game_boards)))
 
-        lives_lost = lives_before - probability_lives_after
-        diff_score = probability_score_after - score_before
-        perc_coins_used = (probability_coins_after+1) / (coins_before+1)
-
         e = eval_view(StateView(new_game_boards[0].get("board"), self.player_id, 1))
 
-        if action.action_type != ActionType.DISCARD:
-            e += 25
-        e += 25 * perc_coins_used
-        e += 100 * diff_score
-        e *= 1 - min(0.75, lives_lost*2)
+        e += 50 * probability_coins_after
+        e += 300 * probability_score_after
+        e += 500 * probability_lives_after
 
         return e
 
