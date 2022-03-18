@@ -45,14 +45,14 @@ class Action:
         if state_view.coins <= 0:
             return actions
 
-        for turn, player_id in zip(range(1, len(state_view.player_ids)), state_view.player_ids):
+        for turn, player_id in zip(range(0, len(state_view.player_ids)), state_view.player_ids):
             if player_id == ignore_player_id:
                 continue
             player_hand: Hand = state_view.get_player_hand(turn)
             existing_options = player_hand.get_existing_numbers().union(player_hand.get_existing_colors())
 
             for option in existing_options:
-                actions.append(Action(ActionType.HINT, option, state_view.get_player_id_for_turn(turn)))
+                actions.append(Action(ActionType.HINT, option, player_id))
         return actions
 
     @staticmethod
