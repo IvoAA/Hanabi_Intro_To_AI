@@ -33,6 +33,9 @@ class CardKnowledge:
     def __str__(self):
         return f"{''.join(map(str, self.possible_numbers)):<5}|{''.join(list(map(lambda x: x.value[0], self.possible_colors))):<5}"
 
+    def __eq__(self, other):
+        return other.possible_colors == self.possible_colors and other.possible_numbers == self.possible_numbers
+
     def __to_dict__(self):
         return {
             "possible_colors": list(map(lambda x: x.value[0], self.possible_colors)),

@@ -17,6 +17,7 @@ class GameBoard:
         self.deck = Deck()
         self.player_hands = {}
         self.player_ids = list(map(lambda x: x.player_id, players))
+        self.player_classes = list(map(lambda x: type(x), players))
         self.give_cards()
 
         self.coins = 8
@@ -210,12 +211,15 @@ class GameBoard:
             "card_board": self.card_board.__to_dict__()
         }
 
+    def __decode_copy__(self):
+        return GameBoard.from_dict(self.__to_dict__(), self.player_classes)
+
     @staticmethod
     def from_dict(object_dict: dict, player_classes: list):
         assert (len(player_classes) == len(object_dict["player_hands"].keys()))
         new_players = []
         for cls, player_name in zip(player_classes, object_dict["player_hands"].keys()):
-            new_players.append(cls(player_name, None))
+            new_players.append(cls(player_name))
 
         new_game_board = GameBoard(new_players)
 

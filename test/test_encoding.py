@@ -1,3 +1,4 @@
+import copy
 import unittest
 from game.card import Card, CardKnowledge
 from constants.card_colors import CardColor
@@ -52,11 +53,11 @@ class TestEncoding(unittest.TestCase):
         hand_encoded = hand.__to_list__()
 
         decoded_hand = Hand.from_list(hand_encoded)
-        first_card: Card = list(decoded_hand.cards.values())[-1]
+        first_card: Card = list(decoded_hand.cards)[-1]
         self.assertEqual(len(first_card.knowledge.possible_numbers), 1)
 
     def test_game_board_dict(self):
-        players = [Alpha(f"{x}", None) for x in range(4)]
+        players = [Alpha(f"{x}") for x in range(4)]
         game_board = GameBoard(players)
         game_board.player_hands['0'].cards[1].give_hint(1)
 
@@ -66,6 +67,29 @@ class TestEncoding(unittest.TestCase):
 
         self.assertEqual(len(game_board.player_hands['0'].cards[1].knowledge.possible_numbers),
                          len(new_game_board.player_hands['0'].cards[1].knowledge.possible_numbers))
+
+
+    def test_coding_vs_copy(self):
+
+        players = [Alpha(f"{x}") for x in range(4)]
+        game_board = GameBoard(players)
+
+        copied_game_board = copy.deepcopy(game_board)
+
+        coded_game_board = game_board.__decode_copy__()
+
+        for copied_card, coded_card in zip(copied_game_board.deck.cards, coded_game_board.deck.cards):
+            self.assertEqual(copied_card, coded_card)
+            self.assertEqual(copied_card.knowledge, coded_card.knowledge)
+
+        for copied_hands, coded_hands in zip(copied_game_board.player_hands.values(), coded_game_board.player_hands.values()):
+            for copied_card, coded_card in zip(copied_hands.cards, coded_hands.cards):
+                self.assertEqual(copied_card, coded_card)
+                self.assertEqual(copied_card.knowledge, coded_card.knowledge)
+
+        self.assertEqual(copied_game_board.player_ids, coded_game_board.player_ids)
+
+        print()
 
 
 if __name__ == '__main__':
