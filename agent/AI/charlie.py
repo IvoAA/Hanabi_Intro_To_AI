@@ -152,7 +152,7 @@ class Charlie(Player):
 
         while True:
             next_node_to_expand = self.tree_builder.get_node_to_expand()
-            if next_node_to_expand.depth > max_depth - 1:
+            if not next_node_to_expand or next_node_to_expand.depth > max_depth - 1:
                 break
 
             if isinstance(next_node_to_expand, GroupedNode):
@@ -164,6 +164,8 @@ class Charlie(Player):
                 continue
 
             for node in nodes_to_explore:
+                if not node:
+                    continue
                 current_depth = next_node_to_expand.depth
                 own_idx = self.game_board.player_ids.index(self.player_id)
                 next_player = self.game_board.player_ids[(own_idx + current_depth) % len(self.game_board.player_ids)]

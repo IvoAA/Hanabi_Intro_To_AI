@@ -43,7 +43,7 @@ class GameBoard:
         if action.action_type == ActionType.PLAY:
             return self.play_card_with_possibilities(player_id, action.action_value)
         elif action.action_type == ActionType.DISCARD:
-            self.discard_card_with_possibilities(player_id, action.action_value)
+            return self.discard_card_with_possibilities(player_id, action.action_value)
         elif action.action_type == ActionType.HINT:
             self.hint(action)
         return [{"probability": 1, "board": copy.deepcopy(self)}]
