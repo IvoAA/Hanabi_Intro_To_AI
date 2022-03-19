@@ -4,6 +4,9 @@ from game.card import Card
 
 
 class CardBoard:
+    """
+    The CardBoard represents the discard pile as well as the goal, which are the 5 pile of cards.
+    """
     def __init__(self):
         self.goal = {CardColor.RED: 0, CardColor.BLUE: 0, CardColor.WHITE: 0, CardColor.YELLOW: 0, CardColor.GREEN: 0}
         self.discard = []

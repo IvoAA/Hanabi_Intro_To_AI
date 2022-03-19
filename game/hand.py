@@ -4,6 +4,9 @@ from game.card import Card
 
 
 class Hand:
+    """
+    The Hand represents the player's cards
+    """
     def __init__(self, cards):
         self.cards = []
 

@@ -12,6 +12,14 @@ class ActionType(Enum):
 
 
 class Action:
+    """
+    An action has 3 specific properties which are:
+     - action_type: ActionType Enum
+     - action_value: PLAYING/DISCARD the index of the card which will be discarded,
+                     HINT the hint information [Color, Number]
+     - effected_player_id: the player which is effected by this actions PLAYING/DISCARD the player him self,
+                                                                        HINT the player which receives the hint.
+    """
     def __init__(self, action_type: ActionType, action_value: Union[CardColor, int], effected_player_id: str):
         self.action_type = action_type
         self.action_value = action_value
@@ -22,6 +30,12 @@ class Action:
 
     @staticmethod
     def get_player_card_actions(state_view: StateView, action_type: ActionType):
+        """
+        Returns all actions which can be done by a player in a specific state
+        @param state_view:
+        @param action_type: which action type should be considered (PLAY/DISCARD)
+        @return: a list of actions
+        """
         actions = []
         for index, card in enumerate(state_view.get_current_player_hand().cards):
             if card is None:
@@ -41,6 +55,13 @@ class Action:
 
     @staticmethod
     def get_hint_actions(state_view: StateView, ignore_player_id: str):
+        """
+        Determines all possible hinting actions for a player in a specific state,
+        with respect to ignore a specific player_id.
+        @param state_view:
+        @param ignore_player_id:
+        @return: a list of all possible actions
+        """
         actions = []
         if state_view.coins <= 0:
             return actions

@@ -6,6 +6,10 @@ from typing import Union, List
 NUMBERS = [1, 2, 3, 4, 5]
 
 class CardKnowledge:
+    """
+    Representation of the card knowledge aka. what is known to
+    the player and the other players about a given card.
+    """
     def __init__(self):
         self.possible_colors = list(CardColor)
         self.possible_numbers = list(NUMBERS)
@@ -51,6 +55,9 @@ class CardKnowledge:
 
 
 class Card:
+    """
+    A playing card which is represented by the color and number and its knowledge
+    """
     def __init__(self, color: CardColor, number: int):
         self.color = color
         self.number = number

@@ -14,6 +14,9 @@ REPETITIONS = {
 
 
 class Deck:
+    """
+    The Deck contains all possible cards and is giving the cards to the players.
+    """
     def __init__(self):
         self.cards = []
 

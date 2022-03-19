@@ -13,6 +13,16 @@ log = logging.getLogger(__name__)
 
 
 class GameBoard:
+    """
+    The GameBoard is containing all the game information such as:
+     - the deck
+     - the player hands
+     - the player ids
+     - the player classes
+     - the coins (blue coins in the original game)
+     - the lives (red coins in the original game)
+     - the card board
+    """
     def __init__(self, players):
         self.deck = Deck()
         self.player_hands = {}
