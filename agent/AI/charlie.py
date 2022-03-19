@@ -3,6 +3,7 @@ import random
 import logging
 
 from agent.AI.card_counter import CardCounter
+from constants.card_colors import CardColor
 from game.card import CardKnowledge
 from game.game_board import GameBoard
 from agent.player import Player
@@ -31,13 +32,31 @@ def eval_view(game_view: StateView):
 
     known_colors = [0]*len(game_view.player_ids)
 
-    discarded_card_multiplier = 5
-    # 110 = sum of all cards values
-    discarded_valuable_cards_eval = 110 * discarded_card_multiplier
+    maximum_score = 25
+    color_max_number = {}
+    for color in CardColor:
+        color_max_number[color] = 5
+        for number in range(game_view.goal.get(color) + 1, 6):
+            count = game_view.discarded.count((color, number))
 
-    for card in game_view.discarded:
-        if game_view.goal[card.color] < card.number:
-            discarded_valuable_cards_eval -= card.number * discarded_card_multiplier
+            all_discarded = False
+            if number == 1:
+                if count >= 3:
+                    all_discarded = True
+                else:
+                    maximum_score -= count/4
+            elif number < 5:
+                if count >= 2:
+                    all_discarded = True
+                else:
+                    maximum_score -= count/2
+            elif number == 5 and count >= 1:
+                all_discarded = True
+
+            if all_discarded:
+                maximum_score -= 6 - number
+                color_max_number[color] = number - 1
+                break
 
     for i, hand in enumerate(game_view.get_ordered_hands()):
         for card in hand.cards:
@@ -64,7 +83,7 @@ def eval_view(game_view: StateView):
                     sure_plays[i] += 1
 
                 # the agent knows a card can be discarded
-                elif game_view.goal.get(k_colors[0]) < k_number - 1:
+                elif game_view.goal.get(k_colors[0]) <= k_number or k_number > color_max_number[k_colors[0]]:
                     sure_discards[i] += 1
 
                 # the agent knows a card that will be needed in the future
@@ -99,14 +118,14 @@ def eval_view(game_view: StateView):
                         known_numbers[i] += 1
 
                 # if all cards on board are higher than max value for this card, discard
-                if min_goal > max(k_numbers):
+                if min_goal >= max(k_numbers) or max(k_numbers) > min(color_max_number.values()):
                     sure_discards[i] += 1
 
                 # if all cards on board are lower than min value for this card, then it will be playable
                 elif max_goal < min(k_numbers):
                     known_playable_numbers[i] += 1
 
-    p_eval = discarded_valuable_cards_eval
+    p_eval = maximum_score * 40
     for i in range(len(game_view.player_ids)):
         p_eval += 25 * sure_plays[i]
         p_eval += 10 * sure_discards[i]
@@ -177,11 +196,8 @@ class Charlie(Player):
         self.game_board.perform_action(self.player_id, action_to_perform)
 
     @staticmethod
-    def evaluate_action(player_id, action: Action, game_board: GameBoard) -> (List[int], List[float], List[GameBoard]):
-        new_game_boards = game_board.perform_simulated_action(player_id, action)
-        probability_lives_after = sum(list(map(lambda r: r.get("probability") * r.get("board").lives, new_game_boards)))
-        probability_score_after = sum(list(map(lambda r: r.get("probability") * r.get("board").get_score(), new_game_boards)))
-        probability_coins_after = sum(list(map(lambda r: r.get("probability") * r.get("board").coins, new_game_boards)))
+    def evaluate_action(player_id, action: Action, game_board: GameBoard, root_player_id: str = '') -> (List[int], List[float], List[GameBoard]):
+        new_game_boards = game_board.perform_simulated_action(player_id, action, root_player_id)
 
         all_evaluations = []
         all_probabilities = []
@@ -190,18 +206,15 @@ class Charlie(Player):
             board = p_board.get("board")
             turns_left = board.count_remaining_cards() + len(board.player_ids)
 
-            if probability_lives_after == 0:
-                e = probability_score_after
+            if board.lives == 0:
+                e = board.get_score()
             else:
-                e = 1250 * probability_lives_after
-                e += 300 * probability_score_after
-                e += 25 * min(probability_coins_after, turns_left-2*probability_coins_after)
+                e = 1250 * board.lives
+                e += 300 * board.get_score()
+                e += 25 * min(board.coins, turns_left-2*board.coins)
 
                 if turns_left > len(board.player_ids) + 2:
                     e += eval_view(StateView(board, player_id, 1))
-
-                if probability_lives_after < 1:
-                    e /= 2
 
             all_evaluations.append(e)
             all_probabilities.append(p_board.get("probability"))

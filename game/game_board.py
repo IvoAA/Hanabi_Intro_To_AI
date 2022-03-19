@@ -48,23 +48,23 @@ class GameBoard:
         elif action.action_type == ActionType.HINT:
             self.hint(action)
 
-    def perform_simulated_action(self, player_id, action: Action):
+    def perform_simulated_action(self, player_id, action: Action, root_player_id: str = ''):
         # log.debug(f"[SIMULATE] Player: {player_id} action: {action}")
         if action.action_type == ActionType.PLAY:
-            return self.play_card_with_possibilities(player_id, action.action_value)
+            return self.play_card_with_possibilities(player_id, action.action_value, root_player_id)
         elif action.action_type == ActionType.DISCARD:
-            return self.discard_card_with_possibilities(player_id, action.action_value)
+            return self.discard_card_with_possibilities(player_id, action.action_value, root_player_id)
         elif action.action_type == ActionType.HINT:
             self.hint(action)
         return [{"probability": 1, "board": copy.deepcopy(self)}]
 
-    def play_card_with_possibilities(self, player_id, card_idx: int):
+    def play_card_with_possibilities(self, player_id, card_idx: int, root_player_id: str = ''):
         player_card: Card = self.player_hands[player_id].cards[card_idx]
         possible_colors = player_card.knowledge.possible_colors
         possible_numbers = player_card.knowledge.possible_numbers
         all_possibilities = list(product(possible_colors, possible_numbers))
 
-        remaining_cards = CardCounter.remaining_cards(self, player_id)
+        remaining_cards = CardCounter.remaining_cards(self, player_id, root_player_id)
         for possibility in all_possibilities:
             if not remaining_cards.__contains__(possibility):
                 all_possibilities.remove(possibility)
@@ -84,12 +84,12 @@ class GameBoard:
             possible_boards.append({"probability": 1 / len(all_possibilities), "board": board})
         return possible_boards
 
-    def discard_card_with_possibilities(self, player_id, card_idx: int):
+    def discard_card_with_possibilities(self, player_id, card_idx: int, root_player_id: str = ''):
         player_card: Card = self.player_hands[player_id].cards[card_idx]
         possible_colors = player_card.knowledge.possible_colors
         possible_numbers = player_card.knowledge.possible_numbers
         all_possibilities = list(product(possible_colors, possible_numbers))
-        remaining_cards = CardCounter.remaining_cards(self, player_id)
+        remaining_cards = CardCounter.remaining_cards(self, player_id, root_player_id)
         for possibility in all_possibilities:
             if not remaining_cards.__contains__(possibility):
                 all_possibilities.remove(possibility)

@@ -25,7 +25,7 @@ class CardCounter:
         return cards
 
     @staticmethod
-    def remaining_cards(game_board, player_id: str) -> List[Card]:
+    def remaining_cards(game_board, player_id: str, root_player_id: str = '') -> List[Card]:
         remaining = CardCounter.full_deck()
         played_cards = []
         played_cards.extend(game_board.card_board.discarded_played_cards())
@@ -34,6 +34,9 @@ class CardCounter:
 
         other_players = copy.deepcopy(game_board.player_ids)
         other_players.remove(player_id)
+
+        if root_player_id and root_player_id != player_id:
+            other_players.remove(root_player_id)
 
         for player in other_players:
             cards = game_board.player_hands[player].cards
