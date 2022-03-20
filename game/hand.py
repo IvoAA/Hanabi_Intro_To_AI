@@ -45,6 +45,13 @@ class Hand:
         knowledge_str = ', '.join(map(lambda x: str(x.knowledge) if x else 'None', self.cards))
         return f"[ {card_str} ] Knowledge: [ {knowledge_str} ]"
 
+    def mask(self):
+        if self is None:
+            return ""
+        card_str = ', '.join(['X']*len(self.cards))
+        knowledge_str = ', '.join(map(lambda x: str(x.knowledge) if x else 'None', self.cards))
+        return f"[ {card_str} ] Knowledge: [ {knowledge_str} ]"
+
     def __to_list__(self):
         return list(map(lambda x: x.__to_dict__(), self.cards))
 

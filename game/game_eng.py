@@ -52,12 +52,12 @@ class GameEngine:
         curr_player = 0
 
         while not self.game_board.finished:
-            self.print_game_state()
+            self.print_game_state(curr_player)
             self.players[curr_player].play()
             curr_player = (curr_player + 1) % self.n_players
             self.game_board.evaluate_game_finish()
         log.error(f"{Fore.MAGENTA}GAME OVER FELLA")
 
-    def print_game_state(self):
+    def print_game_state(self, curr_player_i):
         Screen.clear_screen()
-        self.game_board.view()
+        self.game_board.view(curr_player_i)
