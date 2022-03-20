@@ -13,7 +13,6 @@ class Alpha(Player):
 
     def play(self):
         log.debug(f"Turn of {self.player_id}")
-        input("Press enter to execute random task")
         self.game_view = StateView(self.game_board, self.player_id)
         # idx starts always with zero
         self.game_view: StateView

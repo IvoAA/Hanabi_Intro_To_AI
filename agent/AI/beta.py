@@ -135,7 +135,7 @@ class Beta(Player):
         e = eval_view(StateView(new_game_boards[0].get("board"), self.player_id, 1))
 
         e += 50 * probability_coins_after
-        e += 300 * probability_score_after
+        e += 500 * probability_score_after
         e += 500 * probability_lives_after
 
         return e

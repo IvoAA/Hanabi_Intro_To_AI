@@ -11,8 +11,8 @@ import multiprocessing
 Keep the batch size small in case of having a slow computer.
 This runner will execute batches times batch_size games and return the average point and number of plays for a given agent.
 """
-batches: int = 10
-batch_size: int = 10
+batches: int = 2
+batch_size: int = 20
 total_games = batches * batch_size
 
 
@@ -27,6 +27,7 @@ def run_process():
     max_points = 0
     best_score = 0
     worst_score = 25
+    lives = 0
     q = multiprocessing.Queue()
     for batch in range(batches):
         print(f"Starting batch {batch}")
@@ -47,6 +48,7 @@ def run_process():
         total_score += score
         total_plays += measure[1]
         finish = measure[2]
+        lives += measure[3]
 
         if score > best_score:
             best_score = score
@@ -62,8 +64,8 @@ def run_process():
     enable_print()
     print("--- %s seconds ---" % (time.time() - start_time))
     print(
-        f"Played {total_games} games with an average score of {total_score / total_games} and average number of plays "
-        f"of {total_plays / total_games}")
+        f"Played {total_games} games with an average score of {total_score / total_games}, average number of plays "
+        f"of {total_plays / total_games} and average remaining lives {lives / total_games}")
     print(f"OUT OF LIVES - {out_lives}")
     print(f"EMPTY DECK - {empty_deck}")
     print(f"MAX POINT - {max_points}")

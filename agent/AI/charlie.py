@@ -1,5 +1,4 @@
-import math
-import random
+import os
 import logging
 
 from agent.AI.card_counter import CardCounter
@@ -8,15 +7,26 @@ from game.card import CardKnowledge
 from game.game_board import GameBoard
 from agent.player import Player
 from agent.state_view import StateView
-from game.action import Action, ActionType
+from game.action import Action
 from tree.builder import TreeBuilder
 from tree.node import SingleNode, GroupedNode
 import copy
-
 from typing import List
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 log = logging.getLogger(__name__)
+SURE_PLAY_V = int(os.environ["SURE_PLAY_VALUE"])
+SURE_DISCARD_V = int(os.environ["SURE_DISCARD_VALUE"])
+KNOWN_PLAYABLE_V = int(os.environ["KNOWN_PLAYABLE_VALUE"])
+KNOWN_NUMBER_V = int(os.environ["KNOWN_NUMBER_VALUE"])
+KNOWN_COLOR_V = int(os.environ["KNOWN_COLORS_VALUE"])
 
+LIVES_V = int(os.environ["LIVES_VALUE"])
+SCORE_V = int(os.environ["SCORE_VALUE"])
+COINS_V = int(os.environ["COINS_VALUE"])
 
 def eval_view(game_view: StateView):
     if sum(game_view.goal.values()) == 25:
@@ -127,11 +137,11 @@ def eval_view(game_view: StateView):
 
     p_eval = maximum_score * 40
     for i in range(len(game_view.player_ids)):
-        p_eval += 25 * sure_plays[i]
-        p_eval += 10 * sure_discards[i]
-        p_eval += 3 * known_playable_numbers[i]
-        p_eval += 2 * known_numbers[i]
-        p_eval += 1 * known_colors[i]
+        p_eval += SURE_PLAY_V * sure_plays[i]
+        p_eval += SURE_DISCARD_V * sure_discards[i]
+        p_eval += KNOWN_PLAYABLE_V * known_playable_numbers[i]
+        p_eval += KNOWN_NUMBER_V * known_numbers[i]
+        p_eval += KNOWN_COLOR_V * known_colors[i]
 
         # give diff importance to diff players (e.g. [1, 0.9, 0.8, ...]
         evaluation += p_eval * (1 - i*0.2)
@@ -209,9 +219,9 @@ class Charlie(Player):
             if board.lives == 0:
                 e = board.get_score()
             else:
-                e = 1250 * board.lives
-                e += 300 * board.get_score()
-                e += 25 * min(board.coins, turns_left-2*board.coins)
+                e = LIVES_V * board.lives
+                e += SCORE_V * board.get_score()
+                e += COINS_V * min(board.coins, turns_left-2*board.coins)
 
                 if turns_left > len(board.player_ids) + 2:
                     e += eval_view(StateView(board, player_id, 1))

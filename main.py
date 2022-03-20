@@ -4,7 +4,6 @@ from game.game_eng import GameEngine
 from dotenv import load_dotenv
 import colorama
 import logging, sys
-import random
 
 log = logging.getLogger(__name__)
 
@@ -23,9 +22,9 @@ def run_game(q=None):
     engine.start_game()
     score = engine.game_board.card_board.score()
     print("--- %s seconds ---" % (time.time() - start_time))
-    print(f"Game over score - {score}, actions {engine.game_board.nr_actions}")
+    print(f"Game over score - {score}, actions {engine.game_board.nr_actions}, ending reason {engine.game_board.finish_reason}")
     if q:
-        q.put((score, engine.game_board.nr_actions, engine.game_board.finish_reason))
+        q.put((score, engine.game_board.nr_actions, engine.game_board.finish_reason, engine.game_board.lives))
     return score, engine.game_board.nr_actions
 
 

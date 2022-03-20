@@ -1,4 +1,3 @@
-import logging
 import os
 
 from colorama import Fore
