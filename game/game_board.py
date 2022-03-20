@@ -197,14 +197,18 @@ class GameBoard:
                 self.finish_reason = Finish.EMPTY_DECK
             self.turns_before_end -= 1
 
-    def view(self):
+    def view(self, curr_player_i):
         log.debug("Game view")
         log.debug(f"Remaining cards in Deck (end is drawn first):")
         log.debug(f"{str(self.deck)}")
         log.debug("Hands")
         max_player_id_length = max(list(map(len, self.player_ids)))
         for player_id in self.player_ids:
-            log.debug(f"\t{player_id:<{max_player_id_length}} hand: {self.player_hands[player_id]}")
+            hand = self.player_hands[player_id]
+            if player_id == self.player_ids[curr_player_i]:
+                hand = hand.mask()
+
+            log.debug(f"\t{player_id:<{max_player_id_length}} hand: {hand}")
 
         if log.level == logging.DEBUG:
             log.debug(self.card_board)
