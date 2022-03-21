@@ -18,11 +18,15 @@ load_dotenv()
 
 
 log = logging.getLogger(__name__)
+MAXIMUM_SCORE_V = int(os.environ["MAXIMUM_SCORE_V"])
+
 SURE_PLAY_V = int(os.environ["SURE_PLAY_VALUE"])
 SURE_DISCARD_V = int(os.environ["SURE_DISCARD_VALUE"])
 KNOWN_PLAYABLE_V = int(os.environ["KNOWN_PLAYABLE_VALUE"])
 KNOWN_NUMBER_V = int(os.environ["KNOWN_NUMBER_VALUE"])
 KNOWN_COLOR_V = int(os.environ["KNOWN_COLORS_VALUE"])
+
+PLAYER_LOSS_V = float(os.environ["PLAYER_LOSS_V"])
 
 LIVES_V = int(os.environ["LIVES_VALUE"])
 SCORE_V = int(os.environ["SCORE_VALUE"])
@@ -135,7 +139,7 @@ def eval_view(game_view: StateView):
                 elif max_goal < min(k_numbers):
                     known_playable_numbers[i] += 1
 
-    p_eval = maximum_score * 40
+    p_eval = maximum_score * MAXIMUM_SCORE_V
     for i in range(len(game_view.player_ids)):
         p_eval += SURE_PLAY_V * sure_plays[i]
         p_eval += SURE_DISCARD_V * sure_discards[i]
@@ -144,7 +148,7 @@ def eval_view(game_view: StateView):
         p_eval += KNOWN_COLOR_V * known_colors[i]
 
         # give diff importance to diff players (e.g. [1, 0.9, 0.8, ...]
-        evaluation += p_eval * (1 - i*0.2)
+        evaluation += p_eval * (1 - i*PLAYER_LOSS_V)
 
     return evaluation
 

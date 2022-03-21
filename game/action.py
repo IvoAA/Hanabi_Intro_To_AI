@@ -28,6 +28,9 @@ class Action:
     def __str__(self):
         return f"Type: {self.action_type.value[0]} Value: {self.action_value} ef_player: {self.effected_player_id}"
 
+    def short(self):
+        return f"{self.action_type.value[0]} {self.action_value} {self.effected_player_id}"
+
     @staticmethod
     def get_player_card_actions(state_view: StateView, action_type: ActionType):
         """

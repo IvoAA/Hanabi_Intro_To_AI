@@ -62,17 +62,18 @@ For example increasing "LIVE_VALUE" will make the agent choose actions that woul
 Here is a list of the scores obtained with each of the agents.
 
 1. Alpha - 1.2
-2. Beta - 9.24
-3. Charlie - 13.59 
+2. Beta - 9.2
+3. Charlie - 14.4
 
-Charlie average play was with the next parameters.
-
-SURE_PLAY_VALUE=25
-SURE_DISCARD_VALUE=10
-KNOWN_PLAYABLE_VALUE=3
-KNOWN_NUMBER_VALUE=2
-KNOWN_COLORS_VALUE=1
-LIVES_VALUE=1250
-SCORE_VALUE=300
-COINS_VALUE=25
+Charlie average play was with the following parameters:
+- MAXIMUM_SCORE_V=40
+- SURE_PLAY_VALUE=25
+- SURE_DISCARD_VALUE=10
+- KNOWN_PLAYABLE_VALUE=3
+- KNOWN_NUMBER_VALUE=2
+- KNOWN_COLORS_VALUE=1
+- PLAYER_LOSS_V=0.2
+- LIVES_VALUE=1250
+- SCORE_VALUE=300
+- COINS_VALUE=25
 
